@@ -1,11 +1,11 @@
 "use client";
 
-import React, {useState, useEffect} from 'react';
-import {Trophy, Users, Zap, CheckCircle, Calendar, Clock, TrendingUp, Medal, Flame} from 'lucide-react';
+import React, {useState} from 'react';
+import {Trophy, Users, Zap, CheckCircle, TrendingUp, Flame} from 'lucide-react';
 import Image from "next/image";
 
 export default function LandingPage() {
-    const [timeLeft, setTimeLeft] = useState('2h 15min');
+    const [timeLeft] = useState('2h 15min');
 
     // Mock data pour le top 10
     const topPlayers = [

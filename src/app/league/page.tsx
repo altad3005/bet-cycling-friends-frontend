@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Calendar, BarChart3, Info, Users, Trophy, Clock, Zap, TrendingUp, Medal, Flame, ChevronRight } from 'lucide-react';
+import { Home, Calendar, BarChart3, Info, Users, Trophy, Clock, Zap, TrendingUp, Flame, ChevronRight } from 'lucide-react';
 import Image from "next/image";
 import Link from "next/link";
 
@@ -169,7 +169,7 @@ export default function LeagueHomePage() {
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-2xl font-bold flex items-center gap-2">
                             <Zap className="w-6 h-6 text-yellow-400" />
-                            Fil d'actualité
+                            Fil d&apos;actualité
                         </h3>
                         <div className="text-xs text-slate-500">
                             Dernière mise à jour : {stats.lastUpdate}
@@ -207,7 +207,7 @@ export default function LeagueHomePage() {
                     </div>
 
                     <button className="w-full mt-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
-                        Voir plus d'activités
+                        Voir plus d&apos;activités
                         <ChevronRight className="w-4 h-4" />
                     </button>
                 </section>

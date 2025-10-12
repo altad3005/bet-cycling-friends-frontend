@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Home, Calendar, BarChart3, Info, Users, Trophy, Clock, MapPin, ChevronRight, Filter, Search, CheckCircle, XCircle, Circle, Mountain, Wind, TrendingUp } from 'lucide-react';
+import { Home, Calendar, BarChart3, Info, Users, Trophy, Clock, MapPin, ChevronRight, Search, CheckCircle, Circle, Mountain, Wind, TrendingUp } from 'lucide-react';
 import Link from "next/link";
 import Image from "next/image";
 
@@ -151,18 +151,28 @@ export default function RacesCalendarPage() {
     ];
 
     const getStatusBadge = (status: string) => {
-        const badges = {
+        type Status = 'live' | 'upcoming' | 'finished';
+
+        const badges: Record<Status, {
+            color: string;
+            icon: React.ElementType;
+            label: string;
+            pulse: boolean;
+        }> = {
             live: { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: Circle, label: 'EN DIRECT', pulse: true },
             upcoming: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: Clock, label: 'À venir', pulse: false },
             finished: { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', icon: CheckCircle, label: 'Terminée', pulse: false },
         };
-        const badge = badges[status];
+
+        // Si le status ne correspond à rien, on met une valeur par défaut
+        const badge = badges[status as Status] ?? badges.finished;
         const Icon = badge.icon;
+
         return (
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${badge.color}`}>
-        <Icon className={`w-3 h-3 ${badge.pulse ? 'animate-pulse' : ''}`} />
+            <Icon className={`w-3 h-3 ${badge.pulse ? 'animate-pulse' : ''}`} />
                 {badge.label}
-      </span>
+        </span>
         );
     };
 

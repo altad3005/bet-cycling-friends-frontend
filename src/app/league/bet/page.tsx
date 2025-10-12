@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Home, Calendar, BarChart3, Info, Users, Trophy, Clock, MapPin, ChevronRight, Star, Zap, Shield, Flame, TrendingUp, Mountain, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { Home, Calendar, BarChart3, Trophy, Clock, MapPin, ChevronRight, Star, Zap, Shield, Flame, TrendingUp, Mountain, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function BetPage() {
-    const [selectedRider, setSelectedRider] = useState(null);
-    const [selectedBonus, setSelectedBonus] = useState(null);
-    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [selectedRider, setSelectedRider] = useState<number | null>(null);
+    const [selectedBonus, setSelectedBonus] = useState<string | null>(null);
+    const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
     const leagueName = "Les Grimpeurs Fous";
 
