@@ -31,7 +31,6 @@ export default function ComingSoon() {
 
                 <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
                     La V2 arrive bientôt
-                    test auto
                 </h1>
             </main>
 
