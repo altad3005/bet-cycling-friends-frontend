@@ -30,14 +30,8 @@ export default function ComingSoon() {
                 />
 
                 <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
-                    La V2 arrive bientôt 🚴‍♂️
+                    La V2 arrive bientôt
                 </h1>
-
-                <div className="mt-10 flex items-center gap-3 text-slate-400">
-                    <Trophy className="w-6 h-6 text-yellow-400" />
-                    <span>La V2 est en approche... reste dans la roue 🔥</span>
-                    <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
-                </div>
             </main>
 
             {/* Footer */}
