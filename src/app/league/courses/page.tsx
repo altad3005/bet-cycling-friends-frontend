@@ -1,15 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Home, Calendar, BarChart3, Info, Users, Trophy, Clock, MapPin, ChevronRight, Search, CheckCircle, Circle, Mountain, Wind, TrendingUp } from 'lucide-react';
-import Link from "next/link";
-import Image from "next/image";
+import { Calendar, Trophy, Clock, MapPin, ChevronRight, Search, CheckCircle, Circle} from 'lucide-react';
 
 export default function RacesCalendarPage() {
     const [selectedFilter, setSelectedFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-
-    const leagueName = "Les Grimpeurs Fous";
 
     // Données mock des courses
     const races = [
@@ -23,11 +19,9 @@ export default function RacesCalendarPage() {
             country: "France",
             status: "upcoming",
             timeLeft: "2h 15min",
-            terrain: "pavés",
             distance: "257 km",
             betStatus: "pending",
             participants: 176,
-            favorites: ["Van der Poel", "Van Aert", "Ganna"],
             hasBet: false
         },
         {
@@ -40,11 +34,9 @@ export default function RacesCalendarPage() {
             country: "Belgique",
             status: "upcoming",
             timeLeft: "1 semaine",
-            terrain: "collines",
             distance: "272 km",
             betStatus: "open",
             participants: 175,
-            favorites: ["Pogačar", "Van der Poel", "Evenepoel"],
             hasBet: true
         },
         {
@@ -56,13 +48,11 @@ export default function RacesCalendarPage() {
             category: "Monument",
             country: "Italie",
             status: "finished",
-            terrain: "plat",
             distance: "293 km",
             betStatus: "closed",
             participants: 200,
             winner: "Jasper Philipsen",
             hasBet: true,
-            pointsEarned: 50
         },
         {
             id: 4,
@@ -74,8 +64,6 @@ export default function RacesCalendarPage() {
             country: "France",
             status: "upcoming",
             timeLeft: "3 mois",
-            terrain: "varié",
-            stages: 21,
             betStatus: "soon",
             participants: 176,
             hasBet: false
@@ -89,9 +77,6 @@ export default function RacesCalendarPage() {
             category: "World Tour",
             country: "Italie",
             status: "live",
-            terrain: "varié",
-            currentStage: 5,
-            stages: 7,
             betStatus: "live",
             participants: 168,
             hasBet: true,
@@ -107,11 +92,9 @@ export default function RacesCalendarPage() {
             country: "Belgique",
             status: "upcoming",
             timeLeft: "2 semaines",
-            terrain: "plat/vent",
             distance: "251 km",
             betStatus: "open",
             participants: 173,
-            favorites: ["Pedersen", "Laporte", "Ackermann"],
             hasBet: false
         },
         {
@@ -124,11 +107,9 @@ export default function RacesCalendarPage() {
             country: "Belgique",
             status: "upcoming",
             timeLeft: "1 mois",
-            terrain: "montagne",
             distance: "259 km",
             betStatus: "soon",
             participants: 175,
-            favorites: ["Pogačar", "Roglic", "Evenepoel"],
             hasBet: false
         },
         {
@@ -141,11 +122,9 @@ export default function RacesCalendarPage() {
             country: "Pays-Bas",
             status: "upcoming",
             timeLeft: "3 semaines",
-            terrain: "collines",
             distance: "254 km",
             betStatus: "open",
             participants: 174,
-            favorites: ["Pogačar", "Van der Poel", "Alaphilippe"],
             hasBet: false
         }
     ];
@@ -164,7 +143,6 @@ export default function RacesCalendarPage() {
             finished: { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', icon: CheckCircle, label: 'Terminée', pulse: false },
         };
 
-        // Si le status ne correspond à rien, on met une valeur par défaut
         const badge = badges[status as Status] ?? badges.finished;
         const Icon = badge.icon;
 
@@ -214,12 +192,6 @@ export default function RacesCalendarPage() {
         );
     };
 
-    const getTerrainIcon = (terrain: string | string[]) => {
-        if (terrain.includes('montagne') || terrain.includes('collines')) return <Mountain className="w-4 h-4" />;
-        if (terrain.includes('vent')) return <Wind className="w-4 h-4" />;
-        return <MapPin className="w-4 h-4" />;
-    };
-
     const filters = [
         { id: 'all', label: 'Toutes' },
         { id: 'upcoming', label: 'À venir' },
@@ -245,56 +217,11 @@ export default function RacesCalendarPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white pb-20">
-            {/* Header avec navigation */}
-            <header className="bg-slate-950/80 backdrop-blur-lg border-b border-slate-800 sticky top-0 z-50">
-                <div className="max-w-6xl mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <Image
-                                src="/logo svg.svg"
-                                alt="Logo BetCyclingFriends"
-                                width={40}
-                                height={40}
-                            />
-                            <div>
-                                <h1 className="text-lg font-bold">{leagueName}</h1>
-                                <p className="text-xs text-slate-400">15 membres</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        <button className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg font-medium whitespace-nowrap hover:bg-slate-700 transition-colors flex items-center gap-2">
-                            <Home className="w-4 h-4" />
-                            <Link href={"/league"}>Home</Link>
-                        </button>
-                        <button className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 border border-yellow-500/30">
-                            <Calendar className="w-4 h-4" />
-                            <Link href={"/league/courses"}>Courses</Link>
-                        </button>
-                        <button className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg font-medium whitespace-nowrap hover:bg-slate-700 transition-colors flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4" />
-                            Stats
-                        </button>
-                        <button className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg font-medium whitespace-nowrap hover:bg-slate-700 transition-colors flex items-center gap-2">
-                            <Info className="w-4 h-4" />
-                            Infos ligue
-                        </button>
-                        <button className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg font-medium whitespace-nowrap hover:bg-slate-700 transition-colors flex items-center gap-2">
-                            <Users className="w-4 h-4" />
-                            Admin
-                        </button>
-                    </nav>
-                </div>
-            </header>
-
             <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
                 {/* Header de page */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h2 className="text-3xl font-bold mb-2">Calendrier des courses</h2>
-                        <p className="text-slate-400">Consultez toutes les courses du World Tour et placez vos paris</p>
                     </div>
                 </div>
 
@@ -379,23 +306,9 @@ export default function RacesCalendarPage() {
 
                                         {/* Infos supplémentaires */}
                                         <div className="flex flex-wrap items-center gap-4 text-sm">
-                      <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700 flex items-center gap-1.5">
-                        {getTerrainIcon(race.terrain)}
-                          {race.terrain}
-                      </span>
                                             <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">
                         {race.category}
                       </span>
-                                            {race.type === 'grand-tour' && (
-                                                <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/30">
-                          {race.stages} étapes
-                        </span>
-                                            )}
-                                            {race.type === 'stage-race' && race.currentStage && (
-                                                <span className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-lg border border-orange-500/30">
-                          Étape {race.currentStage}/{race.stages}
-                        </span>
-                                            )}
                                             {race.distance && (
                                                 <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">
                           {race.distance}
@@ -403,17 +316,12 @@ export default function RacesCalendarPage() {
                                             )}
                                         </div>
 
-                                        {/* Favoris ou résultat */}
+                                        {/* Résultat ou leader */}
                                         {race.status === 'finished' && race.winner && (
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Trophy className="w-4 h-4 text-yellow-400" />
                                                 <span className="text-slate-300">Vainqueur:</span>
                                                 <span className="font-semibold text-yellow-400">{race.winner}</span>
-                                                {race.pointsEarned && (
-                                                    <span className="ml-2 px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
-                            +{race.pointsEarned} pts
-                          </span>
-                                                )}
                                             </div>
                                         )}
                                         {race.status === 'live' && race.currentLeader && (
@@ -421,13 +329,6 @@ export default function RacesCalendarPage() {
                                                 <Trophy className="w-4 h-4 text-yellow-400 animate-pulse" />
                                                 <span className="text-slate-300">Leader actuel:</span>
                                                 <span className="font-semibold text-yellow-400">{race.currentLeader}</span>
-                                            </div>
-                                        )}
-                                        {race.favorites && race.status === 'upcoming' && (
-                                            <div className="flex items-center gap-2 text-sm text-slate-400">
-                                                <TrendingUp className="w-4 h-4" />
-                                                <span>Favoris:</span>
-                                                <span className="text-slate-300">{race.favorites.join(', ')}</span>
                                             </div>
                                         )}
                                     </div>
