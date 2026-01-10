@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Calendar, Trophy, Clock, MapPin, ChevronRight, Search, CheckCircle, Circle} from 'lucide-react';
+import { Calendar, Trophy, Clock, MapPin, ChevronRight, Search, CheckCircle, Circle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function RacesCalendarPage() {
     const [selectedFilter, setSelectedFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Données mock des courses
     const races = [
         {
             id: 1,
@@ -73,7 +73,7 @@ export default function RacesCalendarPage() {
             name: "Tirreno-Adriatico",
             date: "2025-03-10",
             time: "11:00",
-            type: "stage-race",
+            type: "stage-races",
             category: "World Tour",
             country: "Italie",
             status: "live",
@@ -82,113 +82,54 @@ export default function RacesCalendarPage() {
             hasBet: true,
             currentLeader: "Remco Evenepoel"
         },
-        {
-            id: 6,
-            name: "Gand-Wevelgem",
-            date: "2025-03-30",
-            time: "10:45",
-            type: "one-day",
-            category: "World Tour",
-            country: "Belgique",
-            status: "upcoming",
-            timeLeft: "2 semaines",
-            distance: "251 km",
-            betStatus: "open",
-            participants: 173,
-            hasBet: false
-        },
-        {
-            id: 7,
-            name: "Liège-Bastogne-Liège",
-            date: "2025-04-27",
-            time: "10:20",
-            type: "one-day",
-            category: "Monument",
-            country: "Belgique",
-            status: "upcoming",
-            timeLeft: "1 mois",
-            distance: "259 km",
-            betStatus: "soon",
-            participants: 175,
-            hasBet: false
-        },
-        {
-            id: 8,
-            name: "Amstel Gold Race",
-            date: "2025-04-20",
-            time: "10:30",
-            type: "one-day",
-            category: "World Tour",
-            country: "Pays-Bas",
-            status: "upcoming",
-            timeLeft: "3 semaines",
-            distance: "254 km",
-            betStatus: "open",
-            participants: 174,
-            hasBet: false
-        }
     ];
 
     const getStatusBadge = (status: string) => {
         type Status = 'live' | 'upcoming' | 'finished';
-
-        const badges: Record<Status, {
-            color: string;
-            icon: React.ElementType;
-            label: string;
-            pulse: boolean;
-        }> = {
+        const badges: Record<Status, { color: string; icon: React.ElementType; label: string; pulse: boolean; }> = {
             live: { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: Circle, label: 'EN DIRECT', pulse: true },
             upcoming: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: Clock, label: 'À venir', pulse: false },
             finished: { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', icon: CheckCircle, label: 'Terminée', pulse: false },
         };
-
         const badge = badges[status as Status] ?? badges.finished;
         const Icon = badge.icon;
-
         return (
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${badge.color}`}>
-            <Icon className={`w-3 h-3 ${badge.pulse ? 'animate-pulse' : ''}`} />
+                <Icon className={`w-3 h-3 ${badge.pulse ? 'animate-pulse' : ''}`} />
                 {badge.label}
-        </span>
+            </span>
         );
     };
 
-    const getBetStatusBadge = (betStatus: string, hasBet: boolean) => {
-        if (betStatus === 'closed') {
-            return (
-                <span className="px-3 py-1.5 bg-slate-700 text-slate-400 rounded-lg text-sm font-medium border border-slate-600">
-          Paris fermés
-        </span>
-            );
+    const BetButton = ({ race }: { race: any }) => {
+        const betLink = race.type === 'grand-tour'
+            ? `/league/races/${race.id}/bet-grand-tour`
+            : `/league/races/${race.id}/bet`;
+
+        if (race.betStatus === 'closed' || race.status === 'finished') {
+            return <span className="px-3 py-1.5 bg-slate-700 text-slate-400 rounded-lg text-sm font-medium border border-slate-600">Paris fermés</span>;
         }
-        if (betStatus === 'live') {
-            return (
-                <span className="px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg text-sm font-medium border border-orange-500/30">
-          Course en cours
-        </span>
-            );
+        if (race.betStatus === 'live') {
+            return <span className="px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg text-sm font-medium border border-orange-500/30">Course en cours</span>;
         }
-        if (betStatus === 'soon') {
-            return (
-                <span className="px-3 py-1.5 bg-slate-700 text-slate-400 rounded-lg text-sm font-medium border border-slate-600">
-          Bientôt disponible
-        </span>
-            );
+        if (race.betStatus === 'soon') {
+            return <span className="px-3 py-1.5 bg-slate-700 text-slate-400 rounded-lg text-sm font-medium border border-slate-600">Bientôt disponible</span>;
         }
-        if (hasBet) {
+        if (race.hasBet) {
             return (
-                <span className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium border border-green-500/30 flex items-center gap-1.5">
-          <CheckCircle className="w-4 h-4" />
-          Pari placé
-        </span>
+                // CORRECTION HTML : Pas de <button> dans le <Link>. Classes appliquées au Link.
+                <Link href={betLink} className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium border border-green-500/30 flex items-center gap-1.5 cursor-pointer hover:bg-green-500/30 transition-colors">
+                    <CheckCircle className="w-4 h-4" />
+                    Pari placé
+                </Link>
             );
         }
         return (
-            <button className="px-4 py-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-lg text-sm font-semibold transition-all text-slate-900 flex items-center gap-1.5">
+            // CORRECTION HTML : Pas de <button> dans le <Link>. Classes appliquées au Link.
+            <Link href={betLink} className="px-4 py-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-lg text-sm font-semibold transition-all text-slate-900 flex items-center gap-1.5 transform hover:scale-105">
                 Parier maintenant
                 <ChevronRight className="w-4 h-4" />
-            </button>
+            </Link>
         );
     };
 
@@ -218,16 +159,12 @@ export default function RacesCalendarPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white pb-20">
             <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-                {/* Header de page */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h2 className="text-3xl font-bold mb-2">Calendrier des courses</h2>
                     </div>
                 </div>
-
-                {/* Barre de recherche et filtres */}
                 <div className="space-y-4">
-                    {/* Recherche */}
                     <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <input
@@ -238,8 +175,6 @@ export default function RacesCalendarPage() {
                             className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-yellow-500/50 transition-colors"
                         />
                     </div>
-
-                    {/* Filtres */}
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {filters.map(filter => (
                             <button
@@ -256,8 +191,6 @@ export default function RacesCalendarPage() {
                         ))}
                     </div>
                 </div>
-
-                {/* Liste des courses */}
                 <div className="space-y-4">
                     {filteredRaces.length === 0 ? (
                         <div className="text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800">
@@ -266,57 +199,34 @@ export default function RacesCalendarPage() {
                         </div>
                     ) : (
                         filteredRaces.map((race) => (
-                            <div
-                                key={race.id}
-                                className="bg-slate-900/50 rounded-2xl p-5 border border-slate-800 hover:border-yellow-500/30 transition-all group"
-                            >
+                            // CORRECTION : DIV conteneur au lieu d'un LINK global
+                            <div key={race.id} className="bg-slate-900/50 rounded-2xl border border-slate-800 hover:border-yellow-500/30 transition-all relative p-5">
                                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                                    {/* Info principale */}
-                                    <div className="flex-1 space-y-3">
+
+                                    {/* ZONE 1 : Lien vers le détail de la course (Gauche) */}
+                                    <Link href={`/league/races/${race.id}`} className="flex-1 space-y-3 block group">
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <h3 className="text-xl font-bold group-hover:text-yellow-400 transition-colors">
-                                                        {race.name}
-                                                    </h3>
+                                                    <h3 className="text-xl font-bold group-hover:text-yellow-400 transition-colors">{race.name}</h3>
                                                     {getStatusBadge(race.status)}
                                                 </div>
                                                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
-                          <span className="flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4" />
-                              {new Date(race.date).toLocaleDateString('fr-FR', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric'
-                              })}
-                          </span>
-                                                    {race.status === 'upcoming' && race.timeLeft && (
-                                                        <span className="flex items-center gap-1.5">
-                              <Clock className="w-4 h-4" />
-                              Dans {race.timeLeft}
-                            </span>
-                                                    )}
                                                     <span className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4" />
-                                                        {race.country}
-                          </span>
+                                                        <Calendar className="w-4 h-4" />
+                                                        {new Date(race.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    </span>
+                                                    {race.status === 'upcoming' && race.timeLeft && (
+                                                        <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />Dans {race.timeLeft}</span>
+                                                    )}
+                                                    <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" />{race.country}</span>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* Infos supplémentaires */}
                                         <div className="flex flex-wrap items-center gap-4 text-sm">
-                                            <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">
-                        {race.category}
-                      </span>
-                                            {race.distance && (
-                                                <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">
-                          {race.distance}
-                        </span>
-                                            )}
+                                            <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">{race.category}</span>
+                                            {race.distance && <span className="px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-slate-700">{race.distance}</span>}
                                         </div>
-
-                                        {/* Résultat ou leader */}
                                         {race.status === 'finished' && race.winner && (
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Trophy className="w-4 h-4 text-yellow-400" />
@@ -331,15 +241,11 @@ export default function RacesCalendarPage() {
                                                 <span className="font-semibold text-yellow-400">{race.currentLeader}</span>
                                             </div>
                                         )}
-                                    </div>
+                                    </Link>
 
-                                    {/* CTA */}
-                                    <div className="flex flex-col items-end gap-2 lg:min-w-[200px]">
-                                        {getBetStatusBadge(race.betStatus, race.hasBet)}
-                                        <button className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors flex items-center gap-1">
-                                            Voir les détails
-                                            <ChevronRight className="w-4 h-4" />
-                                        </button>
+                                    {/* ZONE 2 : Bouton de pari (Droite) - Séparé du Link précédent */}
+                                    <div className="flex flex-col items-end gap-2 lg:min-w-[200px] z-10">
+                                        <BetButton race={race} />
                                     </div>
                                 </div>
                             </div>

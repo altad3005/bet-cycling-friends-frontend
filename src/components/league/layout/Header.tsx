@@ -25,7 +25,7 @@ export default function Header({ title, subtitle, participants }: HeaderProps) {
 
     const navItems = [
         { href: '/league', icon: Home, label: 'Home' },
-        { href: '/league/courses', icon: Calendar, label: 'Courses' },
+        { href: '/league/races', icon: Calendar, label: 'Races' },
         { href: '/league/stats', icon: BarChart3, label: 'Stats' },
         { href: '/league/info', icon: Info, label: 'Infos ligue' },
         { href: '/league/admin', icon: Users, label: 'Admin' },
@@ -68,17 +68,17 @@ export default function Header({ title, subtitle, participants }: HeaderProps) {
                             const isActive = pathname === item.href;
                             const Icon = item.icon;
                             return (
-                                <Link key={item.href} href={item.href} passHref>
-                                    <button
-                                        className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 transition-colors ${
-                                            isActive
-                                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                                        }`}
-                                    >
-                                        <Icon className="w-4 h-4" />
-                                        {item.label}
-                                    </button>
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex items-center gap-2 transition-colors ${
+                                        isActive
+                                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                    }`}
+                                >
+                                    <Icon className="w-4 h-4" />
+                                    {item.label}
                                 </Link>
                             );
                         })}
