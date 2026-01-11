@@ -80,7 +80,7 @@ const RaceDetailPage = ({ params }: { params: Promise<{ raceId: string }> }) => 
 
                 {/* CORRECTION : Pas de <button> dans le <Link> */ }
                 <Link
-                    href={`/league/races/${raceId}/startlist`}
+                    href={`/src/app/leagues/%5BleagueId%5D/races/${raceId}/startlist`}
                     className="w-full p-4 bg-slate-800 text-slate-300 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors"
                 >
                     <Users className="w-5 h-5" />

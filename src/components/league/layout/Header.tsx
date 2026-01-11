@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import ParticipantsPanel from '@/components/league/layout/ParticipantsPanel';
+import UserProfileMenu from '@/components/layout/UserProfileMenu';
 
 type Participant = {
     name: string;
@@ -14,21 +15,22 @@ type Participant = {
 };
 
 type HeaderProps = {
+    leagueId: string;
     title: string;
     subtitle: string;
     participants: Participant[];
 };
 
-export default function Header({ title, subtitle, participants }: HeaderProps) {
+export default function Header({ leagueId, title, subtitle, participants }: HeaderProps) {
     const [isParticipantsPanelOpen, setIsParticipantsPanelOpen] = useState(false);
     const pathname = usePathname();
 
     const navItems = [
-        { href: '/league', icon: Home, label: 'Home' },
-        { href: '/league/races', icon: Calendar, label: 'Races' },
-        { href: '/league/stats', icon: BarChart3, label: 'Stats' },
-        { href: '/league/info', icon: Info, label: 'Infos ligue' },
-        { href: '/league/admin', icon: Users, label: 'Admin' },
+        { href: `/leagues/${leagueId}`, icon: Home, label: 'Home' },
+        { href: `/leagues/${leagueId}/races`, icon: Calendar, label: 'Races' },
+        { href: `/leagues/${leagueId}/stats`, icon: BarChart3, label: 'Stats' },
+        { href: `/leagues/${leagueId}/info`, icon: Info, label: 'Infos ligue' },
+        { href: `/leagues/${leagueId}/admin`, icon: Users, label: 'Admin' },
     ];
 
     return (
@@ -43,26 +45,33 @@ export default function Header({ title, subtitle, participants }: HeaderProps) {
                 <div className="max-w-6xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <Image
-                                src="/bcf_logo.svg"
-                                alt="Logo BetCyclingFriends"
-                                width={40}
-                                height={40}
-                            />
+                            <Link href="/leagues">
+                                <Image
+                                    src="/bcf_logo.svg"
+                                    alt="Logo BetCyclingFriends"
+                                    width={40}
+                                    height={40}
+                                    className="cursor-pointer"
+                                />
+                            </Link>
                             <div>
                                 <h1 className="text-lg font-bold">{title}</h1>
                                 <p className="text-xs text-slate-400">{subtitle}</p>
                             </div>
                         </div>
-                        <button
-                            onClick={() => setIsParticipantsPanelOpen(true)}
-                            className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
-                        >
-                            <Users className="w-5 h-5 text-slate-400" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsParticipantsPanelOpen(true)}
+                                className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+                            >
+                                <Users className="w-5 h-5 text-slate-400" />
+                            </button>
+                            <div className="border-l border-slate-800 ml-2 pl-2">
+                                <UserProfileMenu />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Navigation */}
                     <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {navItems.map((item) => {
                             const isActive = pathname === item.href;
