@@ -7,21 +7,7 @@ export default function Page() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
 
-            <header className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-lg z-50 border-b border-slate-800">
-                <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <Image
-                            src="/bcf_logo.svg"
-                            alt="Logo BetCyclingFriends"
-                            width={100}
-                            height={40}
-                        />
-                    </div>
-                    <button className="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 hover:border-yellow-500/50">
-                        Connexion
-                    </button>
-                </div>
-            </header>
+
 
             <section className="pt-32 pb-20 px-4">
                 <div className="max-w-4xl mx-auto text-center">

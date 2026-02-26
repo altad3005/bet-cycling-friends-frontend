@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function UserProfileMenu() {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -19,9 +20,14 @@ export default function UserProfileMenu() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [profileMenuRef]);
 
-    // Mock user data
-    const user = {
-        name: 'Alex',
+    const { user, logout } = useAuth();
+
+    // Fallback if not logged in (though GlobalHeader should prevent this from rendering)
+    if (!user) return null;
+
+    // Use a placeholder avatar or derived from the DB if available
+    const displayUser = {
+        name: user.pseudo,
         avatar: '🚴',
     };
 
@@ -32,9 +38,9 @@ export default function UserProfileMenu() {
                 className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-800 cursor-pointer transition-colors"
             >
                 <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-full flex items-center justify-center font-bold text-slate-900">
-                    {user.avatar}
+                    {displayUser.avatar}
                 </div>
-                <span className="text-white font-semibold hidden md:block">{user.name}</span>
+                <span className="text-white font-semibold hidden md:block">{displayUser.name}</span>
                 <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
             </div>
             {isProfileMenuOpen && (
@@ -43,7 +49,10 @@ export default function UserProfileMenu() {
                         <User className="w-4 h-4" />
                         Profil
                     </Link>
-                    <button className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-slate-700">
+                    <button
+                        onClick={logout}
+                        className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-slate-700"
+                    >
                         <LogOut className="w-4 h-4" />
                         Déconnexion
                     </button>
