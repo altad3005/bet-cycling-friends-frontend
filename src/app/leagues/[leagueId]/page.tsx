@@ -3,8 +3,11 @@
 import React from 'react';
 import { Trophy, Clock, Zap, ChevronRight } from 'lucide-react';
 import Link from "next/link";
+import { useLeague } from '@/contexts/LeagueContext';
 
 export default function LeagueHomePage() {
+    const { league } = useLeague();
+
     // Données mock
     const nextRace = {
         name: "Paris-Roubaix",
@@ -52,7 +55,7 @@ export default function LeagueHomePage() {
                 </h2>
                 <p className="text-slate-300 mb-4">{nextRace.date}</p>
 
-                <Link href={`/src/app/leagues/%5BleagueId%5D/races/1/bet`} className="w-full block">
+                <Link href={`/leagues/${league?.id}/races/1/bet`} className="w-full block">
                     <button className="w-full py-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/50 text-slate-900 flex items-center justify-center gap-2">
                         {nextRace.status}
                         <ChevronRight className="w-5 h-5" />

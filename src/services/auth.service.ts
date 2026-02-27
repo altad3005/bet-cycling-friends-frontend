@@ -3,6 +3,7 @@ import api from '../lib/api';
 export const authService = {
     login: async (email: string, password: string) => {
         const response = await api.post('/auth/login', { email, password });
+        console.log(response.data);
         return response.data;
     },
 

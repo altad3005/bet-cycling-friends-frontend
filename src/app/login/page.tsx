@@ -24,8 +24,8 @@ export default function LoginPage() {
 
         try {
             const data = await authService.login(email, password);
-            // Backend response: { message, data: { user, token: { token: "..." } } }
-            const token = data.data?.token?.token;
+            // Backend response: { message, data: { user, token: "..." } }
+            const token = data.data?.token;
             if (token) {
                 login(token);
             } else {

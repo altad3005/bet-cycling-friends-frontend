@@ -2,16 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Header from '@/components/league/layout/Header';
-import { leagueService } from '@/services/league.service';
-
-type Member = {
-    id: number;
-    role: string;
-    user: {
-        id: number;
-        pseudo: string;
-    };
-};
+import { LeagueProvider } from '@/contexts/LeagueContext';
 
 type League = {
     id: number;
@@ -27,48 +18,27 @@ export default function LeagueLayout({
     params: Promise<{ leagueId: string }>;
 }) {
     const [leagueId, setLeagueId] = useState<string>('');
-    const [league, setLeague] = useState<League | null>(null);
-    const [members, setMembers] = useState<Member[]>([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         params.then((resolved) => {
-            const id = resolved.leagueId;
-            setLeagueId(id);
-            Promise.all([
-                leagueService.getLeagueDetails(id),
-                leagueService.getLeagueMembers(id),
-            ])
-                .then(([leagueData, membersData]) => {
-                    setLeague(leagueData.data);
-                    setMembers(membersData.data || []);
-                })
-                .catch(() => {
-                    // Errors are non-fatal for the layout; pages handle their own errors
-                })
-                .finally(() => setLoading(false));
+            setLeagueId(resolved.leagueId);
         });
     }, [params]);
 
-    // Map API members to the shape expected by <Header /> and <ParticipantsPanel />
-    const participants = members.map((m) => ({
-        name: m.user?.pseudo || 'Utilisateur',
-        avatar: m.user?.pseudo?.[0]?.toUpperCase() || '?',
-        isAdmin: m.role === 'admin',
-    }));
-
-    const title = loading ? '...' : league?.name ?? `Ligue ${leagueId}`;
-    const subtitle = loading ? '' : `${participants.length} membre${participants.length !== 1 ? 's' : ''}`;
+    if (!leagueId) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-            <Header
-                leagueId={leagueId}
-                title={title}
-                subtitle={subtitle}
-                participants={participants}
-            />
-            <main>{children}</main>
-        </div>
+        <LeagueProvider leagueId={leagueId}>
+            <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col">
+                <Header leagueId={leagueId} />
+                <main className="flex-grow">{children}</main>
+            </div>
+        </LeagueProvider>
     );
 }
