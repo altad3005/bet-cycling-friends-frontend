@@ -34,6 +34,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 } catch (error) {
                     // Token is invalid or expired
                     localStorage.removeItem('auth_token');
+                    document.cookie = 'auth_token=; path=/; max-age=0';
+                    setUser(null);
+                    if (window.location.pathname !== '/') {
+                        window.location.href = '/';
+                    }
                 }
             }
             setIsLoading(false);

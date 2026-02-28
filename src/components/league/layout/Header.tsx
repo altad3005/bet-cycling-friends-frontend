@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ParticipantsPanel from '@/components/league/layout/ParticipantsPanel';
 import { useLeague } from '@/contexts/LeagueContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header({ leagueId }: { leagueId: string }) {
     const { league, members, isLoading } = useLeague();
+    const { user } = useAuth();
     const [isParticipantsPanelOpen, setIsParticipantsPanelOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const pathname = usePathname();
@@ -29,14 +31,15 @@ export default function Header({ leagueId }: { leagueId: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
-    
+
+    const isCurrentUserAdmin = members.some(m => m.user.id === user?.id && m.role?.toUpperCase() === 'ADMIN');
 
     const navItems = [
         { href: `/leagues/${leagueId}`, icon: Home, label: 'Home' },
         { href: `/leagues/${leagueId}/races`, icon: Calendar, label: 'Races' },
         { href: `/leagues/${leagueId}/stats`, icon: BarChart3, label: 'Stats' },
         { href: `/leagues/${leagueId}/info`, icon: Info, label: 'Infos ligue' },
-        { href: `/leagues/${leagueId}/admin`, icon: Users, label: 'Admin' },
+        ...(isCurrentUserAdmin ? [{ href: `/leagues/${leagueId}/admin`, icon: Users, label: 'Admin' }] : []),
     ];
 
     return (
@@ -84,8 +87,8 @@ export default function Header({ leagueId }: { leagueId: string }) {
                                             key={item.href}
                                             href={item.href}
                                             className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-2 transition-colors ${isActive
-                                                    ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'
-                                                    : 'text-slate-300 hover:bg-slate-800'
+                                                ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'
+                                                : 'text-slate-300 hover:bg-slate-800'
                                                 }`}
                                         >
                                             <Icon className="w-4 h-4" />

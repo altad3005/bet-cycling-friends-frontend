@@ -2,16 +2,27 @@ import api from '../lib/api';
 
 export type RaceType = 'GRAND_TOUR' | 'MONUMENT' | 'STAGE_RACE' | 'CLASSIC' | 'CHAMPIONSHIP';
 
+export type Stage = {
+    id: number;
+    raceId: number;
+    name: string;
+    profileIcon: string;
+    stageNumber: number;
+    date: string | null;
+};
+
 export type Race = {
     id: number;
     name: string;
     slug: string;
     type: RaceType;
     multiplicator: number;
+    hasBet?: boolean;
     startDate: string;
     endDate: string;
     nationality: string;
     year: number;
+    stages?: Stage[];
 };
 
 export type PaginatedRaces = {
@@ -50,6 +61,11 @@ export type Prediction = {
     pointsEarned: number | null;
     favoriteRider: Rider;
     bonusRider: Rider;
+    user?: {
+        id: number;
+        pseudo: string;
+        icone: string | null;
+    };
 };
 
 export type FantasyTeam = {
@@ -58,6 +74,11 @@ export type FantasyTeam = {
     raceId: number;
     totalPoints: number | null;
     riders: Rider[];
+    user?: {
+        id: number;
+        pseudo: string;
+        icone: string | null;
+    };
 };
 
 export const raceService = {
@@ -85,6 +106,10 @@ export const raceService = {
         const response = await api.get(`/races/${raceId}/predictions/my`);
         return response.data;
     },
+    getRacePredictions: async (raceId: string | number): Promise<{ data: Prediction[] }> => {
+        const response = await api.get(`/races/${raceId}/predictions`);
+        return response.data;
+    },
     submitPrediction: async (raceId: string | number, favoriteRiderId: number, bonusRiderId: number): Promise<{ message: string, data?: Prediction }> => {
         const response = await api.post(`/races/${raceId}/predictions`, {
             favoriteRiderId,
@@ -99,10 +124,18 @@ export const raceService = {
         });
         return response.data;
     },
+    deletePrediction: async (predictionId: number | string): Promise<{ message: string }> => {
+        const response = await api.delete(`/predictions/${predictionId}`);
+        return response.data;
+    },
 
     // Predictions (Fantasy Teams for Grand Tours)
     getFantasyTeam: async (raceId: string | number): Promise<{ data: FantasyTeam | null }> => {
         const response = await api.get(`/races/${raceId}/fantasy-teams/my`);
+        return response.data;
+    },
+    getRaceFantasyTeams: async (raceId: string | number): Promise<{ data: FantasyTeam[] }> => {
+        const response = await api.get(`/races/${raceId}/fantasy-teams`);
         return response.data;
     },
     submitFantasyTeam: async (raceId: string | number, riderIds: number[]): Promise<{ message: string, data?: FantasyTeam }> => {
@@ -115,6 +148,10 @@ export const raceService = {
         const response = await api.put(`/fantasy-teams/${teamId}`, {
             riderIds
         });
+        return response.data;
+    },
+    deleteFantasyTeam: async (teamId: number | string): Promise<{ message: string }> => {
+        const response = await api.delete(`/fantasy-teams/${teamId}`);
         return response.data;
     }
 };

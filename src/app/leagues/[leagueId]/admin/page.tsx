@@ -1,16 +1,40 @@
 "use client";
 
-import React, { useState, use } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Database, Search, Loader2, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { raceService } from '@/services/race.service';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLeague } from '@/contexts/LeagueContext';
+import { useRouter } from 'next/navigation';
 
 export default function LeagueAdminPage({ params }: { params: Promise<{ leagueId: string }> }) {
     const { leagueId } = use(params);
+    const { user } = useAuth();
+    const { members, isLoading: isLeagueLoading } = useLeague();
+    const router = useRouter();
 
     const [slug, setSlug] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<{ success: boolean; message: string; data?: any } | null>(null);
+
+    useEffect(() => {
+        if (!isLeagueLoading && user && members.length > 0) {
+            const currentMember = members.find(m => m.user.id === user.id);
+            if (!currentMember || currentMember.role?.toUpperCase() !== 'ADMIN') {
+                router.push(`/leagues/${leagueId}`);
+            }
+        }
+    }, [isLeagueLoading, user, members, router, leagueId]);
+
+    // Add another loading state check to prevent flashing the page
+    if (isLeagueLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+            </div>
+        );
+    }
 
     const handleImport = async (e: React.FormEvent) => {
         e.preventDefault();

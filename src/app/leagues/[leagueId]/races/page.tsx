@@ -28,6 +28,7 @@ type DisplayRace = {
     nationality: string;
     multiplicator: number;
     status: 'upcoming' | 'live' | 'finished';
+    hasBet?: boolean;
 };
 
 function getRaceStatus(startDate: string, endDate: string): DisplayRace['status'] {
@@ -50,6 +51,7 @@ function toDisplayRace(r: ApiRace): DisplayRace {
         nationality: r.nationality,
         multiplicator: r.multiplicator,
         status: getRaceStatus(r.startDate, r.endDate),
+        hasBet: r.hasBet,
     };
 }
 
@@ -81,6 +83,14 @@ function BetButton({ race, leagueId }: { race: DisplayRace; leagueId: string }) 
     }
     if (race.status === 'live') {
         return <span className="px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg text-sm font-medium border border-orange-500/30">Course en cours</span>;
+    }
+    if (race.hasBet) {
+        return (
+            <Link href={betLink} className="px-4 py-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 rounded-lg text-sm font-semibold transition-all border border-slate-700 flex items-center gap-1.5 transform hover:scale-105">
+                Voir / Modifier
+                <ChevronRight className="w-4 h-4" />
+            </Link>
+        );
     }
     return (
         <Link href={betLink} className="px-4 py-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-lg text-sm font-semibold transition-all text-slate-900 flex items-center gap-1.5 transform hover:scale-105">
@@ -198,7 +208,14 @@ export default function RacesCalendarPage({ params }: { params: Promise<{ league
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <h3 className="text-xl font-bold group-hover:text-yellow-400 transition-colors">{race.name}</h3>
+                                                    <h3 className="text-xl font-bold group-hover:text-yellow-400 transition-colors flex items-center gap-2">
+                                                        {race.name}
+                                                        {race.hasBet && (
+                                                            <span title="Pari enregistré" className="flex items-center">
+                                                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                                            </span>
+                                                        )}
+                                                    </h3>
                                                     <StatusBadge status={race.status} />
                                                 </div>
                                                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
