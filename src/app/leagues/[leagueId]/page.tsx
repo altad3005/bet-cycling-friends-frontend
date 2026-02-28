@@ -1,67 +1,103 @@
 "use client";
 
-import React from 'react';
-import { Trophy, Clock, Zap, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trophy, Clock, Zap, ChevronRight, Loader2, Calendar } from 'lucide-react';
 import Link from "next/link";
 import { useLeague } from '@/contexts/LeagueContext';
+import { raceService, type Race } from '@/services/race.service';
 
 export default function LeagueHomePage() {
-    const { league } = useLeague();
+    const { league, isLoading: isLeagueLoading } = useLeague();
 
-    // Données mock
-    const nextRace = {
-        name: "Paris-Roubaix",
-        date: "Dimanche 13 avril 2025",
-        timeLeft: "2h 15min",
-        status: "Pariez maintenant !"
-    };
+    const [races, setRaces] = useState<Race[]>([]);
+    const [isRacesLoading, setIsRacesLoading] = useState(true);
 
+    useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        raceService.getRaces(currentYear)
+            .then((res) => setRaces(res.data || []))
+            .catch(console.error)
+            .finally(() => setIsRacesLoading(false));
+    }, []);
+
+    const now = new Date();
+    const upcomingOrLiveRaces = races
+        .filter(r => new Date(r.endDate) >= now)
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+    const nextRace = upcomingOrLiveRaces.length > 0 ? upcomingOrLiveRaces[0] : null;
+    const isNextRaceLive = nextRace ? new Date(nextRace.startDate) <= now && new Date(nextRace.endDate) >= now : false;
+
+    // TODO: Connect these to real APIs in the future
     const topThree = [
         { rank: 1, name: 'MaxPower', points: 1245, avatar: '🚴' },
         { rank: 2, name: 'CyclingQueen', points: 1189, avatar: '👑' },
-        { rank: 3, name: 'VeloMaster', points: 1156, avatar: '⚡'}
+        { rank: 3, name: 'VeloMaster', points: 1156, avatar: '⚡' }
     ];
 
     const recentActivity = [
         { user: 'MaxPower', action: 'a parié sur Wout van Aert', race: 'Paris-Roubaix', time: '5 min' },
-        { user: 'CyclingQueen', action: 'a parié sur Mathieu van der Poel', race: 'Paris-Roubaix', time: '12 min' },
-        { user: 'VeloMaster', action: 'a parié sur Filippo Ganna', race: 'Paris-Roubaix', time: '23 min' },
     ];
 
-    const stats = {
-        totalBets: 12,
-        streak: 2,
-        lastUpdate: '15:42'
-    };
+    const stats = { totalBets: 12, streak: 2, lastUpdate: '15:42' };
+
+    if (isLeagueLoading || isRacesLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 pb-20">
-            <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 border border-yellow-500/30 p-6">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl -z-10"></div>
+            {nextRace ? (
+                <section className={`relative overflow-hidden rounded-2xl border p-6 ${isNextRaceLive ? 'bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-500/20 border-red-500/30' : 'bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 border-yellow-500/30'}`}>
+                    <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -z-10 ${isNextRaceLive ? 'bg-red-500/10' : 'bg-yellow-500/10'}`}></div>
 
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-semibold text-red-400">EN DIRECT</span>
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            {isNextRaceLive ? (
+                                <>
+                                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                                    <span className="text-sm font-semibold text-red-400">EN DIRECT</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Clock className="w-4 h-4 text-blue-400" />
+                                    <span className="text-sm font-semibold text-blue-400">COURSE À VENIR</span>
+                                </>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-slate-400">
+                            <span className="px-2 py-1 bg-slate-900/50 rounded-md border border-slate-700/50">
+                                ×{nextRace.multiplicator}
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <Clock className="w-4 h-4" />
-                        Plus que {nextRace.timeLeft}
-                    </div>
-                </div>
 
-                <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">
-                    {nextRace.name}
-                </h2>
-                <p className="text-slate-300 mb-4">{nextRace.date}</p>
+                    <h2 className={`text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent ${isNextRaceLive ? 'from-red-400 to-orange-500' : 'from-yellow-400 to-amber-500'}`}>
+                        {nextRace.name}
+                    </h2>
+                    <p className="text-slate-300 mb-4 flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(nextRace.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </p>
 
-                <Link href={`/leagues/${league?.id}/races/1/bet`} className="w-full block">
-                    <button className="w-full py-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/50 text-slate-900 flex items-center justify-center gap-2">
-                        {nextRace.status}
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
-                </Link>
-            </section>
+                    <Link href={`/leagues/${league?.id}/races/${nextRace.id}`} className="w-full block">
+                        <button className={`w-full py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-white ${isNextRaceLive ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 shadow-red-500/20' : 'bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-slate-900 shadow-yellow-500/20'}`}>
+                            {isNextRaceLive ? 'Voir la course en direct' : 'Voir les détails & Parier'}
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    </Link>
+                </section>
+            ) : (
+                <section className="bg-slate-900/50 rounded-2xl p-6 border border-slate-800 text-center py-12">
+                    <Trophy className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-slate-300 mb-2">Aucune course à venir</h3>
+                    <p className="text-slate-500">Toutes les courses de la saison semblent être terminées.</p>
+                </section>
+            )}
 
             {/* Top 3 de la ligue */}
             <section className="bg-slate-900/50 rounded-2xl p-6 border border-slate-800">
