@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, use } from 'react';
-import { Calendar, MapPin, Trophy, ChevronRight, Users, BarChart3, Loader2, AlertCircle, Mountain, CheckCircle, Star, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Trophy, ChevronRight, Users, BarChart3, Loader2, AlertCircle, Mountain, CheckCircle, Star, Trash2, Calculator, Medal } from 'lucide-react';
 import Link from 'next/link';
 import { raceService, type Race, type Prediction, type FantasyTeam } from '@/services/race.service';
+import { useLeague } from '@/contexts/LeagueContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const RACE_TYPE_LABELS: Record<string, string> = {
     GRAND_TOUR: 'Grand Tour',
@@ -31,11 +33,15 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
     const [prediction, setPrediction] = useState<Prediction | null>(null);
     const [fantasyTeam, setFantasyTeam] = useState<FantasyTeam | null>(null);
 
+    const { members } = useLeague();
+    const { user } = useAuth();
+
     const [allPredictions, setAllPredictions] = useState<Prediction[]>([]);
     const [allFantasyTeams, setAllFantasyTeams] = useState<FantasyTeam[]>([]);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isScoring, setIsScoring] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const loadData = () => {
@@ -50,13 +56,13 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                 if (fetchedRace.type === 'GRAND_TOUR') {
                     const promises: Promise<any>[] = [raceService.getFantasyTeam(raceId).then(pRes => setFantasyTeam(pRes.data)).catch(() => { })];
                     if (isFinished) {
-                        promises.push(raceService.getRaceFantasyTeams(raceId).then(res => setAllFantasyTeams(res.data)).catch(() => { }));
+                        promises.push(raceService.getRaceFantasyTeams(raceId, leagueId).then(res => setAllFantasyTeams(res.data)).catch(() => { }));
                     }
                     return Promise.all(promises);
                 } else {
                     const promises: Promise<any>[] = [raceService.getPrediction(raceId).then(pRes => setPrediction(pRes.data)).catch(() => { })];
                     if (isFinished) {
-                        promises.push(raceService.getRacePredictions(raceId).then(res => setAllPredictions(res.data)).catch(() => { }));
+                        promises.push(raceService.getRacePredictions(raceId, leagueId).then(res => setAllPredictions(res.data)).catch(() => { }));
                     }
                     return Promise.all(promises);
                 }
@@ -101,6 +107,26 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
         }
     };
 
+    const handleScoreRace = async () => {
+        if (!window.confirm('Es-tu sûr de vouloir calculer les points pour cette course ? Cela affectera tous les joueurs.')) return;
+
+        setIsScoring(true);
+        try {
+            if (race?.type === 'GRAND_TOUR') {
+                await raceService.scoreFantasyTeams(raceId);
+            } else {
+                await raceService.scoreRace(raceId);
+            }
+            alert('Les points ont été calculés avec succès !');
+            await loadData();
+        } catch (err: any) {
+            console.error('Scoring error:', err);
+            alert(err.response?.data?.message || 'Erreur lors du calcul des points.');
+        } finally {
+            setIsScoring(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
@@ -128,6 +154,8 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
     const startDate = new Date(race.startDate);
     const endDate = new Date(race.endDate);
     const status = now < startDate ? 'upcoming' : now > endDate ? 'finished' : 'live';
+
+    const isAdmin = members.find(m => m.user.id === user?.id)?.role === 'admin';
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 pb-20">
@@ -272,6 +300,17 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                     <Users className="w-5 h-5" />
                     Voir la Startlist
                 </Link>
+
+                {status === 'finished' && isAdmin && (
+                    <button
+                        onClick={handleScoreRace}
+                        disabled={isScoring}
+                        className="w-full md:col-span-2 p-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] shadow-xl border border-purple-400/30"
+                    >
+                        {isScoring ? <Loader2 className="w-5 h-5 animate-spin" /> : <Calculator className="w-5 h-5" />}
+                        {isScoring ? 'Calcul des points en cours...' : 'Corriger les pronostics (Admin)'}
+                    </button>
+                )}
             </section>
 
             {/* Stages List (For Grand Tours / Stage Races) */}
@@ -319,87 +358,77 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                 </section>
             )}
 
-            {/* League Bets (if finished) */}
-            {status === 'finished' && race.type !== 'GRAND_TOUR' && allPredictions.length > 0 && (
-                <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
-                    <div className="p-6 border-b border-slate-800 bg-slate-900/95 flex items-center gap-3">
-                        <Users className="w-6 h-6 text-indigo-400" />
-                        <h3 className="text-xl font-bold text-white">Paris de la ligue</h3>
-                    </div>
-                    <div className="divide-y divide-slate-800/50">
-                        {allPredictions.map((pred) => (
-                            <div key={pred.id} className="p-4 md:px-6 flex flex-col md:flex-row md:items-center gap-4 hover:bg-slate-800/30 transition-colors">
-                                <div className="flex items-center gap-3 md:w-1/4">
-                                    <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden border border-slate-700 flex-shrink-0">
-                                        {pred.user?.icone ? (
-                                            <span className="text-xl w-full h-full flex items-center justify-center">{pred.user.icone}</span>
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-indigo-500/20 text-indigo-400 font-bold">
-                                                {pred.user?.pseudo?.charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="font-bold text-slate-200">{pred.user?.pseudo}</div>
-                                </div>
-
-                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/50 flex items-center gap-2">
-                                        <Trophy className="w-4 h-4 text-yellow-500" />
-                                        <span className="text-sm font-medium text-slate-300 truncate">{pred.favoriteRider.fullName}</span>
-                                    </div>
-                                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/50 flex items-center gap-2">
-                                        <Star className="w-4 h-4 text-purple-400" />
-                                        <span className="text-sm font-medium text-slate-300 truncate">{pred.bonusRider.fullName}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
-
-            {status === 'finished' && race.type === 'GRAND_TOUR' && allFantasyTeams.length > 0 && (
-                <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
-                    <div className="p-6 border-b border-slate-800 bg-slate-900/95 flex items-center gap-3">
-                        <Users className="w-6 h-6 text-indigo-400" />
-                        <h3 className="text-xl font-bold text-white">Équipes de la ligue</h3>
-                    </div>
-                    <div className="divide-y divide-slate-800/50">
-                        {allFantasyTeams.map((team) => (
-                            <div key={team.id} className="p-4 md:px-6 hover:bg-slate-800/30 transition-colors space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden border border-slate-700 flex-shrink-0">
-                                        {team.user?.icone ? (
-                                            <span className="text-xl w-full h-full flex items-center justify-center">{team.user.icone}</span>
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-indigo-500/20 text-indigo-400 font-bold">
-                                                {team.user?.pseudo?.charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="font-bold text-slate-200">{team.user?.pseudo}</div>
-                                </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    {team.riders && team.riders.map(rider => (
-                                        <div key={rider.id} className="bg-slate-950/50 p-2 rounded-lg border border-slate-800/50 text-xs text-slate-300 truncate flex items-center gap-1.5">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400/50"></div>
-                                            {rider.fullName}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
-
-            {/* Race Results (if finished) - TODO: Need league-specific ranking endpoint */}
+            {/* League Bets & Ranking (if finished) */}
             {status === 'finished' && (
-                <section className="bg-slate-900/50 rounded-2xl p-6 border border-slate-800 text-center py-12 mt-8">
-                    <BarChart3 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-slate-300 mb-2">Classement de la ligue</h3>
-                    <p className="text-slate-500">Le calcul des points pour cette course arrive bientôt.</p>
+                <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
+                    <div className="p-6 border-b border-slate-800 bg-slate-900/95 flex items-center gap-3">
+                        <BarChart3 className="w-6 h-6 text-yellow-500" />
+                        <h3 className="text-xl font-bold text-white">Classement de la course</h3>
+                    </div>
+
+                    <div className="divide-y divide-slate-800/50">
+                        {race.type === 'GRAND_TOUR' ? (
+                            [...allFantasyTeams]
+                                .sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0))
+                                .map((team, index) => (
+                                    <div key={team.id} className="p-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/30 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${index === 0 ? 'bg-yellow-500 text-slate-900' :
+                                                index === 1 ? 'bg-slate-400 text-slate-900' :
+                                                    index === 2 ? 'bg-amber-700 text-slate-100' :
+                                                        'bg-slate-800 text-slate-400 border border-slate-700'
+                                                }`}>
+                                                {index + 1}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <div className="font-bold text-slate-200">
+                                                    {team.user?.pseudo} {team.user?.id === user?.id && <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full ml-2">Toi</span>}
+                                                </div>
+                                                <div className="text-xs font-medium text-slate-400 mt-1">Équipe sélectionnée</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 md:ml-auto">
+                                            <span className="text-2xl font-black text-white">{team.totalPoints || 0}</span>
+                                            <span className="text-sm font-semibold text-slate-400">PTS</span>
+                                        </div>
+                                    </div>
+                                ))
+                        ) : (
+                            [...allPredictions]
+                                .sort((a, b) => (b.pointsEarned || 0) - (a.pointsEarned || 0))
+                                .map((pred, index) => (
+                                    <div key={pred.id} className="p-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/30 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${index === 0 ? 'bg-yellow-500 text-slate-900' :
+                                                index === 1 ? 'bg-slate-400 text-slate-900' :
+                                                    index === 2 ? 'bg-amber-700 text-slate-100' :
+                                                        'bg-slate-800 text-slate-400 border border-slate-700'
+                                                }`}>
+                                                {index + 1}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <div className="font-bold text-slate-200">
+                                                    {pred.user?.pseudo} {pred.user?.id === user?.id && <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full ml-2">Toi</span>}
+                                                </div>
+                                                <div className="flex items-center gap-3 text-xs mt-1.5">
+                                                    <span className="flex items-center gap-1 opacity-80"><Trophy className="w-3 h-3 text-yellow-500" /> {pred.favoriteRider.fullName}</span>
+                                                    <span className="flex items-center gap-1 opacity-80"><Star className="w-3 h-3 text-purple-400" /> {pred.bonusRider.fullName}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 md:ml-auto">
+                                            <span className="text-2xl font-black text-white">{pred.pointsEarned || 0}</span>
+                                            <span className="text-sm font-semibold text-slate-400">PTS</span>
+                                        </div>
+                                    </div>
+                                ))
+                        )}
+                        {((race.type === 'GRAND_TOUR' && allFantasyTeams.length === 0) || (race.type !== 'GRAND_TOUR' && allPredictions.length === 0)) && (
+                            <div className="p-8 text-center text-slate-500">
+                                Aucun pari n'a été placé pour cette course.
+                            </div>
+                        )}
+                    </div>
                 </section>
             )}
         </div>

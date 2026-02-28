@@ -106,8 +106,9 @@ export const raceService = {
         const response = await api.get(`/races/${raceId}/predictions/my`);
         return response.data;
     },
-    getRacePredictions: async (raceId: string | number): Promise<{ data: Prediction[] }> => {
-        const response = await api.get(`/races/${raceId}/predictions`);
+    getRacePredictions: async (raceId: string | number, leagueId?: string): Promise<{ data: Prediction[] }> => {
+        const url = leagueId ? `/races/${raceId}/predictions?league_id=${leagueId}` : `/races/${raceId}/predictions`;
+        const response = await api.get(url);
         return response.data;
     },
     submitPrediction: async (raceId: string | number, favoriteRiderId: number, bonusRiderId: number): Promise<{ message: string, data?: Prediction }> => {
@@ -134,8 +135,20 @@ export const raceService = {
         const response = await api.get(`/races/${raceId}/fantasy-teams/my`);
         return response.data;
     },
-    getRaceFantasyTeams: async (raceId: string | number): Promise<{ data: FantasyTeam[] }> => {
-        const response = await api.get(`/races/${raceId}/fantasy-teams`);
+    getRaceFantasyTeams: async (raceId: string | number, leagueId?: string): Promise<{ data: FantasyTeam[] }> => {
+        const url = leagueId ? `/races/${raceId}/fantasy-teams?league_id=${leagueId}` : `/races/${raceId}/fantasy-teams`;
+        return await api.get(url);
+    },
+
+    // Trigger calculation of prediction scores (Admin only typically)
+    scoreRace: async (raceId: number | string): Promise<{ message: string }> => {
+        const response = await api.post(`/races/${raceId}/score-predictions`);
+        return response.data;
+    },
+
+    // Trigger calculation of fantasy team scores (Admin only typically)
+    scoreFantasyTeams: async (raceId: number | string): Promise<{ message: string }> => {
+        const response = await api.post(`/races/${raceId}/score-fantasy-teams`);
         return response.data;
     },
     submitFantasyTeam: async (raceId: string | number, riderIds: number[]): Promise<{ message: string, data?: FantasyTeam }> => {
