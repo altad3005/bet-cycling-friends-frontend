@@ -52,16 +52,17 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                 setRace(fetchedRace);
                 const now = new Date();
                 const isFinished = now > new Date(fetchedRace.endDate);
+                const hasStarted = now >= new Date(fetchedRace.startDate);
 
                 if (fetchedRace.type === 'GRAND_TOUR') {
                     const promises: Promise<any>[] = [raceService.getFantasyTeam(raceId).then(pRes => setFantasyTeam(pRes.data)).catch(() => { })];
-                    if (isFinished) {
+                    if (hasStarted) {
                         promises.push(raceService.getRaceFantasyTeams(raceId, leagueId).then(res => setAllFantasyTeams(res.data)).catch(() => { }));
                     }
                     return Promise.all(promises);
                 } else {
                     const promises: Promise<any>[] = [raceService.getPrediction(raceId).then(pRes => setPrediction(pRes.data)).catch(() => { })];
-                    if (isFinished) {
+                    if (hasStarted) {
                         promises.push(raceService.getRacePredictions(raceId, leagueId).then(res => setAllPredictions(res.data)).catch(() => { }));
                     }
                     return Promise.all(promises);
@@ -151,6 +152,7 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
         : `/leagues/${leagueId}/races/${raceId}/bet`;
 
     const now = new Date();
+
     const startDate = new Date(race.startDate);
     const endDate = new Date(race.endDate);
     const status = now < startDate ? 'upcoming' : now > endDate ? 'finished' : 'live';
@@ -358,12 +360,12 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                 </section>
             )}
 
-            {/* League Bets & Ranking (if finished) */}
-            {status === 'finished' && (
+            {/* League Bets & Ranking (if finished or live) */}
+            {(status === 'finished' || status === 'live') && (
                 <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
                     <div className="p-6 border-b border-slate-800 bg-slate-900/95 flex items-center gap-3">
                         <BarChart3 className="w-6 h-6 text-yellow-500" />
-                        <h3 className="text-xl font-bold text-white">Classement de la course</h3>
+                        <h3 className="text-xl font-bold text-white">Classement & Paris</h3>
                     </div>
 
                     <div className="divide-y divide-slate-800/50">

@@ -5,12 +5,16 @@ import { Trophy, Clock, Zap, ChevronRight, Loader2, Calendar } from 'lucide-reac
 import Link from "next/link";
 import { useLeague } from '@/contexts/LeagueContext';
 import { raceService, type Race } from '@/services/race.service';
+import { leaderboardService, type LeaderboardEntry } from '@/services/leaderboard.service';
 
 export default function LeagueHomePage() {
     const { league, isLoading: isLeagueLoading } = useLeague();
 
     const [races, setRaces] = useState<Race[]>([]);
     const [isRacesLoading, setIsRacesLoading] = useState(true);
+
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(true);
 
     useEffect(() => {
         const currentYear = new Date().getFullYear();
@@ -20,6 +24,16 @@ export default function LeagueHomePage() {
             .finally(() => setIsRacesLoading(false));
     }, []);
 
+    useEffect(() => {
+        if (league?.id) {
+            setIsLeaderboardLoading(true);
+            leaderboardService.getLeagueLeaderboard(league.id)
+                .then(res => setLeaderboard(res.data.slice(0, 3)))
+                .catch(console.error)
+                .finally(() => setIsLeaderboardLoading(false));
+        }
+    }, [league?.id]);
+
     const now = new Date();
     const upcomingOrLiveRaces = races
         .filter(r => new Date(r.endDate) >= now)
@@ -28,20 +42,13 @@ export default function LeagueHomePage() {
     const nextRace = upcomingOrLiveRaces.length > 0 ? upcomingOrLiveRaces[0] : null;
     const isNextRaceLive = nextRace ? new Date(nextRace.startDate) <= now && new Date(nextRace.endDate) >= now : false;
 
-    // TODO: Connect these to real APIs in the future
-    const topThree = [
-        { rank: 1, name: 'MaxPower', points: 1245, avatar: '🚴' },
-        { rank: 2, name: 'CyclingQueen', points: 1189, avatar: '👑' },
-        { rank: 3, name: 'VeloMaster', points: 1156, avatar: '⚡' }
-    ];
-
     const recentActivity = [
         { user: 'MaxPower', action: 'a parié sur Wout van Aert', race: 'Paris-Roubaix', time: '5 min' },
     ];
 
     const stats = { totalBets: 12, streak: 2, lastUpdate: '15:42' };
 
-    if (isLeagueLoading || isRacesLoading) {
+    if (isLeagueLoading || isRacesLoading || isLeaderboardLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
                 <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
@@ -106,44 +113,56 @@ export default function LeagueHomePage() {
                         <Trophy className="w-6 h-6 text-yellow-400" />
                         Top 3 de la ligue
                     </h3>
-                    <button className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors flex items-center gap-1">
-                        Voir tout
-                        <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <Link href={`/leagues/${league?.id}/leaderboard`}>
+                        <button className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors flex items-center gap-1">
+                            Voir tout
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </Link>
                 </div>
 
                 <div className="space-y-3">
-                    {topThree.map((player, idx) => {
-                        const colors = [
-                            'from-yellow-400 to-yellow-600',
-                            'from-gray-300 to-gray-500',
-                            'from-orange-400 to-orange-600'
-                        ];
-                        const medals = ['🥇', '🥈', '🥉'];
+                    {leaderboard.length === 0 ? (
+                        <div className="text-center text-slate-500 py-4">Aucun point attribué pour l'instant.</div>
+                    ) : (
+                        leaderboard.map((player, idx) => {
+                            const colors = [
+                                'from-yellow-400 to-yellow-600',
+                                'from-gray-300 to-gray-500',
+                                'from-orange-400 to-orange-600'
+                            ];
+                            const medals = ['🥇', '🥈', '🥉'];
 
-                        return (
-                            <div
-                                key={player.rank}
-                                className={`group relative overflow-hidden rounded-xl bg-gradient-to-r ${colors[idx]} p-[2px] hover:scale-102 transition-all duration-300`}
-                            >
-                                <div className="bg-slate-900 rounded-xl p-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-4 flex-1">
-                                        <div className="text-3xl font-bold w-10 text-center">
-                                            {medals[idx]}
+                            return (
+                                <div
+                                    key={player.id}
+                                    className={`group relative overflow-hidden rounded-xl bg-gradient-to-r ${colors[idx] || 'from-slate-700 to-slate-800'} p-[2px] transition-all duration-300`}
+                                >
+                                    <div className="bg-slate-900 rounded-xl p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-4 flex-1">
+                                            <div className="text-3xl font-bold w-10 text-center">
+                                                {medals[idx] || idx + 1}
+                                            </div>
+                                            <div className="text-3xl">
+                                                {player.icone && player.icone.startsWith('http') ? (
+                                                    <img src={player.icone} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                                ) : (
+                                                    player.icone || '🚴'
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="font-bold text-lg">{player.pseudo}</div>
+                                            </div>
                                         </div>
-                                        <div className="text-3xl">{player.avatar}</div>
-                                        <div className="flex-1">
-                                            <div className="font-bold text-lg">{player.name}</div>
+                                        <div className="text-right">
+                                            <div className="text-2xl font-bold text-yellow-400">{player.total_score}</div>
+                                            <div className="text-xs text-slate-500">points</div>
                                         </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-2xl font-bold text-yellow-400">{player.points}</div>
-                                        <div className="text-xs text-slate-500">points</div>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </section>
 
