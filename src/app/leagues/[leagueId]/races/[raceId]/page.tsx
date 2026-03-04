@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { raceService, type Race, type Prediction, type FantasyTeam } from '@/services/race.service';
 import { useLeague } from '@/contexts/LeagueContext';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorAlert from '@/components/ui/ErrorAlert';
 
 const RACE_TYPE_LABELS: Record<string, string> = {
     GRAND_TOUR: 'Grand Tour',
@@ -129,20 +131,13 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
     };
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     if (error || !race) {
         return (
             <div className="max-w-6xl mx-auto px-4 py-6">
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    {error || "Course introuvable"}
-                </div>
+                <ErrorAlert message={error || "Course introuvable"} />
             </div>
         );
     }

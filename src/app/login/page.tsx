@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
+import { Mail, Lock, LogIn } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import FormInput from '@/components/ui/FormInput';
+import GradientButton from '@/components/ui/GradientButton';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -57,66 +61,37 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-red-400">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{error}</span>
-                    </div>
-                )}
+                <ErrorAlert message={error} className="mb-6" />
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Adresse Email
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Mail className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                                placeholder="votre@email.com"
-                            />
-                        </div>
-                    </div>
+                    <FormInput
+                        label="Adresse Email"
+                        icon={Mail}
+                        type="email"
+                        required
+                        value={email}
+                        onChange={setEmail}
+                        placeholder="votre@email.com"
+                    />
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Mot de passe
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                    </div>
+                    <FormInput
+                        label="Mot de passe"
+                        icon={Lock}
+                        type="password"
+                        required
+                        value={password}
+                        onChange={setPassword}
+                        placeholder="••••••••"
+                    />
 
-                    <button
+                    <GradientButton
                         type="submit"
-                        disabled={loading}
-                        className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-slate-900 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-amber-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        loading={loading}
+                        icon={LogIn}
+                        className="w-full mt-6"
                     >
-                        {loading ? (
-                            <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                            <>
-                                <LogIn className="w-5 h-5" />
-                                Se connecter
-                            </>
-                        )}
-                    </button>
+                        Se connecter
+                    </GradientButton>
                 </form>
 
                 <div className="mt-8 text-center">

@@ -4,6 +4,11 @@ import React, { useState, useEffect, use } from 'react';
 import { Users, AlertCircle, Loader2, Search, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { raceService, type Rider } from '@/services/race.service';
+import BackLink from '@/components/ui/BackLink';
+import SearchInput from '@/components/ui/SearchInput';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function StartlistPage({ params }: { params: Promise<{ leagueId: string, raceId: string }> }) {
     const { leagueId, raceId } = use(params);
@@ -16,7 +21,8 @@ export default function StartlistPage({ params }: { params: Promise<{ leagueId: 
     useEffect(() => {
         raceService.getStartlist(raceId)
             .then((res) => {
-                setRiders(res.data.riders || []);
+                const uniqueRiders = Array.from(new Map((res.data.riders || []).map(r => [r.id, r])).values());
+                setRiders(uniqueRiders as Rider[]);
             })
             .catch(() => {
                 setError('Impossible de charger la startlist. Veuillez réessayer.');
@@ -56,13 +62,7 @@ export default function StartlistPage({ params }: { params: Promise<{ leagueId: 
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6 pb-20">
             {/* Header */}
             <div className="flex flex-col gap-4">
-                <Link
-                    href={`/leagues/${leagueId}/races/${raceId}`}
-                    className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-max"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Retour à la course
-                </Link>
+                <BackLink href={`/leagues/${leagueId}/races/${raceId}`} label="Retour à la course" />
 
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center">
@@ -78,37 +78,26 @@ export default function StartlistPage({ params }: { params: Promise<{ leagueId: 
             </div>
 
             {/* Search */}
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                    type="text"
-                    placeholder="Rechercher un coureur ou une équipe..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-yellow-500/50 transition-colors"
-                />
-            </div>
+            <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Rechercher un coureur ou une équipe..."
+            />
 
             {/* Content */}
-            {isLoading && (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-                </div>
-            )}
+            {isLoading && <LoadingSpinner size="section" />}
 
-            {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
+            {error && <ErrorAlert message={error} className="mb-4" />}
 
             {!isLoading && !error && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredTeams.length === 0 ? (
-                        <div className="md:col-span-2 text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800">
-                            <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                            <p className="text-slate-400 text-lg">Aucun coureur trouvé</p>
+                        <div className="md:col-span-2">
+                            <EmptyState
+                                icon={Users}
+                                title="Aucun coureur trouvé"
+                                className="bg-slate-900/50 rounded-2xl border border-slate-800"
+                            />
                         </div>
                     ) : (
                         filteredTeams.map(({ teamName, riders }) => (

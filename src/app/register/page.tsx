@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Mail, Lock, UserPlus, AlertCircle, AtSign } from 'lucide-react';
+import { Mail, Lock, UserPlus, AtSign } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import FormInput from '@/components/ui/FormInput';
+import GradientButton from '@/components/ui/GradientButton';
 
 export default function RegisterPage() {
     const [pseudo, setPseudo] = useState('');
@@ -76,115 +80,63 @@ export default function RegisterPage() {
                     </p>
                 </div>
 
-                {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-red-400">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{error}</span>
-                    </div>
-                )}
+                <ErrorAlert message={error} className="mb-6" />
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Pseudo */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Pseudo
-                            <span className="ml-1 text-xs text-slate-500">(lettres, chiffres, _ — min. 3 caractères)</span>
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <AtSign className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <input
-                                type="text"
-                                required
-                                minLength={3}
-                                maxLength={30}
-                                pattern="^[a-zA-Z0-9_]+"
-                                value={pseudo}
-                                onChange={(e) => setPseudo(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                                placeholder="MonPseudo42"
-                            />
-                        </div>
-                    </div>
+                    <FormInput
+                        label="Pseudo"
+                        hint="(lettres, chiffres, _ — min. 3 caractères)"
+                        icon={AtSign}
+                        required
+                        minLength={3}
+                        maxLength={30}
+                        pattern="^[a-zA-Z0-9_]+"
+                        value={pseudo}
+                        onChange={setPseudo}
+                        placeholder="MonPseudo42"
+                    />
 
-                    {/* Email */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Adresse Email
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Mail className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                                placeholder="votre@email.com"
-                            />
-                        </div>
-                    </div>
+                    <FormInput
+                        label="Adresse Email"
+                        icon={Mail}
+                        type="email"
+                        required
+                        value={email}
+                        onChange={setEmail}
+                        placeholder="votre@email.com"
+                    />
 
-                    {/* Password */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Mot de passe
-                            <span className="ml-1 text-xs text-slate-500">(min. 12 caractères)</span>
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                minLength={12}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                                placeholder="••••••••••••"
-                            />
-                        </div>
-                    </div>
+                    <FormInput
+                        label="Mot de passe"
+                        hint="(min. 12 caractères)"
+                        icon={Lock}
+                        type="password"
+                        required
+                        minLength={12}
+                        value={password}
+                        onChange={setPassword}
+                        placeholder="••••••••••••"
+                    />
 
-                    {/* Confirm Password */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Confirmer le mot de passe
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-slate-500" />
-                            </div>
-                            <input
-                                type="password"
-                                required
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                minLength={12}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
-                                placeholder="••••••••••••"
-                            />
-                        </div>
-                    </div>
+                    <FormInput
+                        label="Confirmer le mot de passe"
+                        icon={Lock}
+                        type="password"
+                        required
+                        minLength={12}
+                        value={confirmPassword}
+                        onChange={setConfirmPassword}
+                        placeholder="••••••••••••"
+                    />
 
-                    <button
+                    <GradientButton
                         type="submit"
-                        disabled={loading}
-                        className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-slate-900 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-amber-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                        loading={loading}
+                        icon={UserPlus}
+                        className="w-full mt-6"
                     >
-                        {loading ? (
-                            <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                            <>
-                                <UserPlus className="w-5 h-5" />
-                                Créer mon compte
-                            </>
-                        )}
-                    </button>
+                        Créer mon compte
+                    </GradientButton>
                 </form>
 
                 <div className="mt-8 text-center">

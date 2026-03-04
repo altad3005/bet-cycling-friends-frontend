@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo, use } from 'react';
 import { Calendar, MapPin, Mountain, Search, CheckCircle, Users, Edit, Shield, Loader2, AlertCircle, ArrowLeft, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { raceService, type Race, type Rider, type FantasyTeam } from '@/services/race.service';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorAlert from '@/components/ui/ErrorAlert';
 
 const MAX_TEAM_SIZE = 8;
 
@@ -31,7 +33,8 @@ export default function BetGrandTourPage({ params }: { params: Promise<{ leagueI
             raceService.getFantasyTeam(raceId).catch(() => ({ data: null }))
         ]).then(([raceRes, startlistRes, teamRes]) => {
             setRace(raceRes.data);
-            setRiders(startlistRes.data?.riders || []);
+            const uniqueRiders = Array.from(new Map((startlistRes.data?.riders || []).map(r => [r.id, r])).values());
+            setRiders(uniqueRiders as Rider[]);
 
             if (teamRes.data) {
                 setTeam(teamRes.data);
@@ -109,20 +112,13 @@ export default function BetGrandTourPage({ params }: { params: Promise<{ leagueI
     };
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-950">
-                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-            </div>
-        );
+        return <LoadingSpinner size="page" />;
     }
 
     if (!race) {
         return (
             <div className="min-h-screen bg-slate-950 p-6 flex items-center justify-center">
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 max-w-md">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    {error || "Course introuvable"}
-                </div>
+                <ErrorAlert message={error || "Course introuvable"} className="max-w-md" />
             </div>
         );
     }
@@ -143,10 +139,7 @@ export default function BetGrandTourPage({ params }: { params: Promise<{ leagueI
                     </Link>
 
                     {error && (
-                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400 animate-in fade-in slide-in-from-top-4">
-                            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                            <p>{error}</p>
-                        </div>
+                        <ErrorAlert message={error} className="animate-in fade-in slide-in-from-top-4" />
                     )}
                 </div>
 

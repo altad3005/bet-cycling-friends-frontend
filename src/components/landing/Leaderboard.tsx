@@ -1,34 +1,23 @@
 import React from 'react';
 import { Trophy } from 'lucide-react';
+import LeaderboardPlayerCard from '@/components/league/LeaderboardPlayerCard';
 
 export function Leaderboard() {
     // Mock data
     const topPlayers = [
-        { rank: 1, name: 'MaxPower', points: 1245, avatar: '🚴' },
-        { rank: 2, name: 'CyclingQueen', points: 1189, avatar: '👑' },
-        { rank: 3, name: 'VeloMaster', points: 1156, avatar: '⚡' },
-        { rank: 4, name: 'SprinterPro', points: 1098, avatar: '🏆' },
-        { rank: 5, name: 'ClimberKing', points: 1045, avatar: '⛰️' },
-        { rank: 6, name: 'RouleVite', points: 998, avatar: '💨' },
-        { rank: 7, name: 'PedalPower', points: 967, avatar: '🔥' },
-        { rank: 8, name: 'BikeNinja', points: 934, avatar: '🥷' },
-        { rank: 9, name: 'TourFan', points: 901, avatar: '🎯' },
-        { rank: 10, name: 'SprintGod', points: 876, avatar: '⚡' }
+        { id: 1, pseudo: 'MaxPower', total_score: 1245, icone: '🚴' },
+        { id: 2, pseudo: 'CyclingQueen', total_score: 1189, icone: '👑' },
+        { id: 3, pseudo: 'VeloMaster', total_score: 1156, icone: '⚡' },
+        { id: 4, pseudo: 'SprinterPro', total_score: 1098, icone: '🏆' },
+        { id: 5, pseudo: 'ClimberKing', total_score: 1045, icone: '⛰️' },
+        { id: 6, pseudo: 'RouleVite', total_score: 998, icone: '💨' },
+        { id: 7, pseudo: 'PedalPower', total_score: 967, icone: '🔥' },
+        { id: 8, pseudo: 'BikeNinja', total_score: 934, icone: '🥷' },
+        { id: 9, pseudo: 'TourFan', total_score: 901, icone: '🎯' },
+        { id: 10, pseudo: 'SprintGod', total_score: 876, icone: '⚡' }
     ];
 
-    const getRankColor = (rank: number) => {
-        if (rank === 1) return 'from-yellow-400 to-yellow-600';
-        if (rank === 2) return 'from-gray-300 to-gray-500';
-        if (rank === 3) return 'from-orange-400 to-orange-600';
-        return 'from-slate-700 to-slate-900';
-    };
 
-    const getRankIcon = (rank: number) => {
-        if (rank === 1) return '🥇';
-        if (rank === 2) return '🥈';
-        if (rank === 3) return '🥉';
-        return `#${rank}`;
-    };
 
     return (
         <section className="py-20 px-4">
@@ -42,27 +31,8 @@ export function Leaderboard() {
                 </div>
 
                 <div className="space-y-3">
-                    {topPlayers.map((player) => (
-                        <div
-                            key={player.rank}
-                            className={`group relative overflow-hidden rounded-xl bg-gradient-to-r ${getRankColor(player.rank)} p-[2px] hover:scale-102 transition-all duration-300`}
-                        >
-                            <div className="bg-slate-900 rounded-xl p-4 flex items-center justify-between">
-                                <div className="flex items-center gap-4 flex-1">
-                                    <div className="text-3xl font-bold w-12 text-center">
-                                        {getRankIcon(player.rank)}
-                                    </div>
-                                    <div className="text-4xl">{player.avatar}</div>
-                                    <div className="flex-1">
-                                        <div className="font-bold text-lg">{player.name}</div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-2xl font-bold text-yellow-400">{player.points}</div>
-                                    <div className="text-xs text-slate-500">points</div>
-                                </div>
-                            </div>
-                        </div>
+                    {topPlayers.map((player, idx) => (
+                        <LeaderboardPlayerCard key={player.id} player={player as any} rank={idx} />
                     ))}
                 </div>
             </div>

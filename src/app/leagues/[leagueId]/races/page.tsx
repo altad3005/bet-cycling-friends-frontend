@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, use } from 'react';
-import {
-    Calendar, Trophy, Clock, MapPin, ChevronRight,
-    Search, CheckCircle, Circle, Loader2, AlertCircle
-} from 'lucide-react';
+import { Calendar, MapPin, ChevronRight, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { raceService, type Race as ApiRace, type RaceType } from '@/services/race.service';
+
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import EmptyState from '@/components/ui/EmptyState';
+import SearchInput from '@/components/ui/SearchInput';
+import StatusBadge from '@/components/race/StatusBadge';
 
 // -------------- Helpers / Types --------------
 
@@ -57,21 +60,7 @@ function toDisplayRace(r: ApiRace): DisplayRace {
 
 // -------------- Sub-components --------------
 
-function StatusBadge({ status }: { status: DisplayRace['status'] }) {
-    const badges = {
-        live: { color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: Circle, label: 'EN DIRECT', pulse: true },
-        upcoming: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: Clock, label: 'À venir', pulse: false },
-        finished: { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', icon: CheckCircle, label: 'Terminée', pulse: false },
-    };
-    const badge = badges[status] ?? badges.finished;
-    const Icon = badge.icon;
-    return (
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${badge.color}`}>
-            <Icon className={`w-3 h-3 ${badge.pulse ? 'animate-pulse' : ''}`} />
-            {badge.label}
-        </span>
-    );
-}
+
 
 function BetButton({ race, leagueId }: { race: DisplayRace; leagueId: string }) {
     const betLink = race.type === 'GRAND_TOUR'
@@ -153,16 +142,11 @@ export default function RacesCalendarPage({ params }: { params: Promise<{ league
 
             {/* Search + Filters */}
             <div className="space-y-3">
-                <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher une course ou un pays..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-yellow-500/50 transition-colors"
-                    />
-                </div>
+                <SearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Rechercher une course ou un pays..."
+                />
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                     {filters.map(filter => (
                         <button
@@ -180,26 +164,17 @@ export default function RacesCalendarPage({ params }: { params: Promise<{ league
             </div>
 
             {/* Content */}
-            {isLoading && (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-                </div>
-            )}
-
-            {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
-
+            {isLoading && <LoadingSpinner size="section" />}
+            {error && <ErrorAlert message={error} className="mb-4" />}
             {!isLoading && !error && (
                 <div className="space-y-4">
                     {filteredRaces.length === 0 ? (
-                        <div className="text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800">
-                            <Calendar className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                            <p className="text-slate-400 text-lg">Aucune course trouvée</p>
-                        </div>
+                        <EmptyState
+                            icon={Calendar}
+                            title="Aucune course trouvée"
+                            subtitle="Recherchez un autre nom ou modifiez vos filtres."
+                            className="bg-slate-900/50 rounded-2xl border border-slate-800"
+                        />
                     ) : (
                         filteredRaces.map((race) => (
                             <div key={race.id} className="bg-slate-900/50 rounded-2xl border border-slate-800 hover:border-yellow-500/30 transition-all p-5">
@@ -216,7 +191,7 @@ export default function RacesCalendarPage({ params }: { params: Promise<{ league
                                                             </span>
                                                         )}
                                                     </h3>
-                                                    <StatusBadge status={race.status} />
+                                                    <StatusBadge status={race.status as any} />
                                                 </div>
                                                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
                                                     <span className="flex items-center gap-1.5">

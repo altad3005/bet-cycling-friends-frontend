@@ -2,9 +2,13 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { leagueService } from '@/services/league.service';
+
+import BackLink from '@/components/ui/BackLink';
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import GradientButton from '@/components/ui/GradientButton';
 
 export default function CreateLeaguePage() {
     const [name, setName] = useState('');
@@ -40,22 +44,14 @@ export default function CreateLeaguePage() {
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-10">
-            <Link href="/leagues" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8">
-                <ArrowLeft className="w-4 h-4" />
-                Retour aux ligues
-            </Link>
+            <BackLink href="/leagues" label="Retour aux ligues" className="mb-8" />
 
             <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent mb-2">
                 Créer une ligue
             </h1>
             <p className="text-slate-400 mb-8">Tu seras automatiquement l&apos;administrateur de ta nouvelle ligue.</p>
 
-            {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-red-400">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">{error}</span>
-                </div>
-            )}
+            <ErrorAlert message={error} className="mb-6" />
 
             <form onSubmit={handleSubmit} className="bg-slate-900/50 rounded-2xl border border-slate-800 p-8 space-y-6">
                 <div>
@@ -92,29 +88,21 @@ export default function CreateLeaguePage() {
 
                 <div className="flex gap-4 pt-2">
                     <Link href="/leagues" className="flex-1">
-                        <button
-                            type="button"
-                            className="w-full py-3 px-6 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors font-semibold"
-                        >
+                        <GradientButton variant="secondary" className="w-full py-3">
                             Annuler
-                        </button>
+                        </GradientButton>
                     </Link>
-                    <button
+                    <GradientButton
                         type="submit"
-                        disabled={loading || name.length < 3}
-                        className="flex-1 py-3 px-6 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 rounded-xl font-bold text-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        disabled={name.length < 3}
+                        loading={loading}
+                        icon={Plus}
+                        className="flex-1 py-3"
                     >
-                        {loading ? (
-                            <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            <>
-                                <Plus className="w-5 h-5" />
-                                Créer la ligue
-                            </>
-                        )}
-                    </button>
+                        Créer la ligue
+                    </GradientButton>
                 </div>
             </form>
-        </div>
+        </div >
     );
 }

@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, use } from 'react';
-import { Database, Search, Loader2, CheckCircle, AlertCircle, Plus } from 'lucide-react';
+import { Database, Plus } from 'lucide-react';
 import { raceService } from '@/services/race.service';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLeague } from '@/contexts/LeagueContext';
 import { useRouter } from 'next/navigation';
+
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import SearchInput from '@/components/ui/SearchInput';
+import GradientButton from '@/components/ui/GradientButton';
 
 export default function LeagueAdminPage({ params }: { params: Promise<{ leagueId: string }> }) {
     const { leagueId } = use(params);
@@ -29,11 +34,7 @@ export default function LeagueAdminPage({ params }: { params: Promise<{ leagueId
 
     // Add another loading state check to prevent flashing the page
     if (isLeagueLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     const handleImport = async (e: React.FormEvent) => {
@@ -94,54 +95,34 @@ export default function LeagueAdminPage({ params }: { params: Promise<{ leagueId
                             <label htmlFor="slug" className="block text-sm font-medium text-slate-300 mb-2">
                                 Slug ProCyclingStats (ex: <i>strade-bianche</i>)
                             </label>
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <input
-                                    type="text"
-                                    id="slug"
-                                    value={slug}
-                                    onChange={(e) => setSlug(e.target.value)}
-                                    placeholder="Entrez le slug..."
-                                    className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-colors"
-                                    disabled={isLoading}
-                                />
-                            </div>
+                            <SearchInput
+                                value={slug}
+                                onChange={setSlug}
+                                placeholder="Entrez le slug..."
+                                disabled={isLoading}
+                            />
                             <p className="text-xs text-slate-500 mt-2">
                                 Le slug est présent dans l'URL de PCS
                                 (ex: procyclingstats.com/race/<strong>strade-bianche</strong>/2025).
                             </p>
                         </div>
 
-                        {/* Result feedback inline */}
                         {result && (
-                            <div className={`p-3 rounded-xl border flex items-start gap-3 text-sm mt-4 ${result.success ? 'bg-green-500/10 border-green-500/30 text-green-300' : 'bg-red-500/10 border-red-500/30 text-red-300'
-                                }`}>
-                                {result.success ? (
-                                    <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-green-400" />
-                                ) : (
-                                    <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-400" />
-                                )}
-                                <div>
-                                    <p className="font-semibold">{result.message}</p>
-                                    {result.success && result.data && (
-                                        <p className="mt-1 opacity-80">{result.data.name} importée avec succès.</p>
-                                    )}
-                                </div>
-                            </div>
+                            <ErrorAlert
+                                message={result.message}
+                                className={`mt-4 ${result.success ? 'bg-green-500/10 border-green-500/30 text-green-300' : ''}`}
+                            />
                         )}
 
-                        <button
+                        <GradientButton
                             type="submit"
                             disabled={!slug.trim() || isLoading}
-                            className="w-full py-3 mt-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            loading={isLoading}
+                            icon={Plus}
+                            className="w-full py-3 mt-4"
                         >
-                            {isLoading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <Plus className="w-5 h-5" />
-                            )}
                             {isLoading ? 'Importation...' : 'Importer la course'}
-                        </button>
+                        </GradientButton>
                     </form>
                 </section>
 

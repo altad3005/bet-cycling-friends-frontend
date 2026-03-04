@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, ArrowRight, Star, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Users, ArrowRight, Star } from 'lucide-react';
 import Link from 'next/link';
 import { leagueService } from '@/services/league.service';
 import { useAuth } from '@/contexts/AuthContext';
+
+import GradientButton from '@/components/ui/GradientButton';
+import ErrorAlert from '@/components/ui/ErrorAlert';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import EmptyState from '@/components/ui/EmptyState';
 
 type League = {
     id: number;
@@ -80,10 +85,9 @@ export default function LeaguesPage() {
                     <p className="text-slate-400 mt-2">Rejoins une ligue ou crées-en une pour commencer à parier !</p>
                 </div>
                 <Link href="/leagues/create">
-                    <button className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-900 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
-                        <Plus className="w-5 h-5" />
+                    <GradientButton icon={Plus} className="w-full sm:w-auto px-6 py-3 rounded-xl text-lg hover:scale-105">
                         Créer une ligue
-                    </button>
+                    </GradientButton>
                 </Link>
             </div>
 
@@ -91,12 +95,7 @@ export default function LeaguesPage() {
             <section className="bg-slate-900/50 rounded-2xl p-6 border border-slate-800">
                 <h2 className="text-2xl font-bold mb-4">Rejoindre une ligue</h2>
                 <p className="text-sm text-slate-500 mb-3">Format du code : <code className="bg-slate-800 px-1 rounded">ID:code</code> — ex: <code className="bg-slate-800 px-1 rounded">3:abc12345</code></p>
-                {joinError && (
-                    <div className="mb-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                        {joinError}
-                    </div>
-                )}
+                <ErrorAlert message={joinError} className="mb-3" />
                 <div className="flex flex-col sm:flex-row gap-4">
                     <input
                         type="text"
@@ -105,13 +104,15 @@ export default function LeaguesPage() {
                         placeholder="Entre le code de la ligue..."
                         className="flex-grow px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
-                    <button
+                    <GradientButton
+                        variant="secondary"
                         onClick={handleJoin}
-                        disabled={joinLoading || !joinCode.trim()}
-                        className="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        disabled={!joinCode.trim()}
+                        loading={joinLoading}
+                        className="px-8 py-3 rounded-lg"
                     >
-                        {joinLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Rejoindre'}
-                    </button>
+                        Rejoindre
+                    </GradientButton>
                 </div>
             </section>
 
@@ -119,25 +120,15 @@ export default function LeaguesPage() {
             <section className="space-y-4">
                 <h2 className="text-2xl font-bold">Tes ligues actuelles</h2>
 
-                {loading && (
-                    <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
-                    </div>
-                )}
-
-                {error && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-400">
-                        <AlertCircle className="w-5 h-5" />
-                        {error}
-                    </div>
-                )}
+                {loading && <LoadingSpinner size="section" />}
+                <ErrorAlert message={error} className="mb-4" />
 
                 {!loading && !error && memberships.length === 0 && (
-                    <div className="text-center py-16 text-slate-500">
-                        <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                        <p className="text-lg">Tu n&apos;as pas encore de ligue.</p>
-                        <p className="text-sm mt-1">Crée ta première ligue ou rejoins-en une !</p>
-                    </div>
+                    <EmptyState
+                        icon={Users}
+                        title="Tu n'as pas encore de ligue."
+                        subtitle="Crée ta première ligue ou rejoins-en une !"
+                    />
                 )}
 
                 {!loading && memberships.length > 0 && (
