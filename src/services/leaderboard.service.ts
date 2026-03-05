@@ -13,7 +13,11 @@ export const leaderboardService = {
         return response.data;
     },
     getGlobalLeaderboard: async (): Promise<{ data: LeaderboardEntry[] }> => {
-        const response = await api.get(`/leaderboard/users`);
+        const response = await api.get(`/leaderboard`);
+        return response.data;
+    },
+    getGlobalStats: async (): Promise<{ data: any }> => {
+        const response = await api.get('/stats');
         return response.data;
     }
 };

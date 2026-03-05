@@ -167,7 +167,7 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                             <span className="flex items-center gap-1.5">
                                 <Calendar className="w-4 h-4" />
                                 {startDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                {startDate.getTime() !== endDate.getTime() && ` - ${endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+                                {startDate.toDateString() !== endDate.toDateString() && ` - ${endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <MapPin className="w-4 h-4" />

@@ -196,8 +196,8 @@ export default function RacesCalendarPage({ params }: { params: Promise<{ league
                                                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
                                                     <span className="flex items-center gap-1.5">
                                                         <Calendar className="w-4 h-4" />
-                                                        {new Date(race.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                                                        {race.startDate !== race.endDate && (
+                                                        {new Date(race.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                        {new Date(race.startDate).toDateString() !== new Date(race.endDate).toDateString() && (
                                                             <> → {new Date(race.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</>
                                                         )}
                                                     </span>

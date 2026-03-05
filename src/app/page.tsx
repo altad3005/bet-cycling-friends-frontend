@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { StatsBar } from '@/components/landing/StatsBar';
 import { Leaderboard } from '@/components/landing/Leaderboard';
+import { LandingActions } from '@/components/landing/LandingActions';
 
 export default function Page() {
     return (
@@ -25,11 +26,7 @@ export default function Page() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                        <Link href="/register">
-                            <button className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/50 text-slate-900 w-full sm:w-auto">
-                                Créer ma ligue gratuite
-                            </button>
-                        </Link>
+                        <LandingActions />
                     </div>
                 </div>
             </section>

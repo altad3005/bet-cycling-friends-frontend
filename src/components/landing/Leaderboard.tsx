@@ -1,24 +1,20 @@
-import React from 'react';
-import { Trophy } from 'lucide-react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import { Trophy, Loader2 } from 'lucide-react';
 import LeaderboardPlayerCard from '@/components/league/LeaderboardPlayerCard';
+import { leaderboardService, type LeaderboardEntry } from '@/services/leaderboard.service';
 
 export function Leaderboard() {
-    // Mock data
-    const topPlayers = [
-        { id: 1, pseudo: 'MaxPower', total_score: 1245, icone: '🚴' },
-        { id: 2, pseudo: 'CyclingQueen', total_score: 1189, icone: '👑' },
-        { id: 3, pseudo: 'VeloMaster', total_score: 1156, icone: '⚡' },
-        { id: 4, pseudo: 'SprinterPro', total_score: 1098, icone: '🏆' },
-        { id: 5, pseudo: 'ClimberKing', total_score: 1045, icone: '⛰️' },
-        { id: 6, pseudo: 'RouleVite', total_score: 998, icone: '💨' },
-        { id: 7, pseudo: 'PedalPower', total_score: 967, icone: '🔥' },
-        { id: 8, pseudo: 'BikeNinja', total_score: 934, icone: '🥷' },
-        { id: 9, pseudo: 'TourFan', total_score: 901, icone: '🎯' },
-        { id: 10, pseudo: 'SprintGod', total_score: 876, icone: '⚡' }
-    ];
+    const [topPlayers, setTopPlayers] = useState<LeaderboardEntry[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-
-
+    useEffect(() => {
+        leaderboardService.getGlobalLeaderboard()
+            .then(res => setTopPlayers(res.data.slice(0, 10)))
+            .catch(console.error)
+            .finally(() => setIsLoading(false));
+    }, []);
     return (
         <section className="py-20 px-4">
             <div className="max-w-4xl mx-auto">
@@ -31,9 +27,17 @@ export function Leaderboard() {
                 </div>
 
                 <div className="space-y-3">
-                    {topPlayers.map((player, idx) => (
-                        <LeaderboardPlayerCard key={player.id} player={player as any} rank={idx} />
-                    ))}
+                    {isLoading ? (
+                        <div className="flex justify-center py-10">
+                            <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+                        </div>
+                    ) : topPlayers.length === 0 ? (
+                        <p className="text-center text-slate-500">Aucun pronostiqueur n'a encore obtenu de points.</p>
+                    ) : (
+                        topPlayers.map((player, idx) => (
+                            <LeaderboardPlayerCard key={player.id} player={player as any} rank={idx} />
+                        ))
+                    )}
                 </div>
             </div>
         </section>
