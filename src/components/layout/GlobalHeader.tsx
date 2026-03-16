@@ -13,7 +13,7 @@ export default function GlobalHeader() {
             <div className="max-w-6xl mx-auto px-4 py-3">
                 <div className="flex items-center justify-between">
                     {/* Logo */}
-                    <Link href="/leagues" className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3">
                         <Image
                             src="/bcf_logo.svg"
                             alt="Logo BetCyclingFriends"
