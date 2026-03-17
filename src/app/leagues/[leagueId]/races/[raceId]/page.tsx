@@ -298,62 +298,17 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                     Voir la Startlist
                 </Link>
 
-                {status === 'finished' && isAdmin && (
+                {((status === 'finished' || (status === 'live' && race.type === 'GRAND_TOUR')) && isAdmin) && (
                     <button
                         onClick={handleScoreRace}
                         disabled={isScoring}
                         className="w-full md:col-span-2 p-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] shadow-xl border border-purple-400/30"
                     >
                         {isScoring ? <Loader2 className="w-5 h-5 animate-spin" /> : <Calculator className="w-5 h-5" />}
-                        {isScoring ? 'Calcul des points en cours...' : 'Corriger les pronostics (Admin)'}
+                        {isScoring ? 'Synchronisation des étapes et calcul en cours...' : race.type === 'GRAND_TOUR' ? 'Mettre à jour les points (Admin)' : 'Corriger les pronostics (Admin)'}
                     </button>
                 )}
             </section>
-
-            {/* Stages List (For Grand Tours / Stage Races) */}
-            {race.stages && race.stages.length > 0 && (
-                <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
-                    <div className="p-6 border-b border-slate-800 bg-slate-900/95 flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <MapPin className="w-5 h-5 text-blue-400" />
-                            Étapes ({race.stages.length})
-                        </h3>
-                    </div>
-                    <div className="divide-y divide-slate-800/50">
-                        {race.stages.map((stage) => {
-                            const stageDate = stage.date ? new Date(stage.date) : null;
-                            const isPast = stageDate ? stageDate < now && stageDate.toDateString() !== now.toDateString() : false;
-                            const isToday = stageDate ? stageDate.toDateString() === now.toDateString() : false;
-
-                            return (
-                                <div key={stage.id} className={`p-4 md:px-6 flex items-center gap-4 hover:bg-slate-800/30 transition-colors ${isPast ? 'opacity-60' : ''} ${isToday ? 'bg-blue-500/5 border-l-2 border-l-blue-500' : ''}`}>
-                                    <div className="flex-shrink-0 w-12 text-center">
-                                        <div className="text-xs text-slate-500 uppercase font-semibold">Étape</div>
-                                        <div className={`text-xl font-bold ${isToday ? 'text-blue-400' : 'text-slate-300'}`}>{stage.stageNumber}</div>
-                                    </div>
-
-                                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                        <div>
-                                            <div className="font-bold text-slate-200 truncate">{stage.name}</div>
-                                            {stageDate && (
-                                                <div className="text-sm text-slate-500 mt-0.5">
-                                                    {stageDate.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex items-center gap-3 flex-shrink-0 self-start sm:self-auto">
-                                            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center justify-center min-w-[3rem]">
-                                                {renderProfileIcon(stage.profileIcon)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </section>
-            )}
 
             {/* League Bets & Ranking (if finished or live) */}
             {(status === 'finished' || status === 'live') && (
@@ -425,6 +380,51 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
                                 Aucun pari n'a été placé pour cette course.
                             </div>
                         )}
+                    </div>
+                </section>
+            )}
+
+            {/* Stages List (For Grand Tours / Stage Races) */}
+            {race.stages && race.stages.length > 0 && (
+                <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
+                    <div className="p-6 border-b border-slate-800 bg-slate-900/95 flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <MapPin className="w-5 h-5 text-blue-400" />
+                            Étapes ({race.stages.length})
+                        </h3>
+                    </div>
+                    <div className="divide-y divide-slate-800/50">
+                        {race.stages.map((stage) => {
+                            const stageDate = stage.date ? new Date(stage.date) : null;
+                            const isPast = stageDate ? stageDate < now && stageDate.toDateString() !== now.toDateString() : false;
+                            const isToday = stageDate ? stageDate.toDateString() === now.toDateString() : false;
+
+                            return (
+                                <div key={stage.id} className={`p-4 md:px-6 flex items-center gap-4 hover:bg-slate-800/30 transition-colors ${isPast ? 'opacity-60' : ''} ${isToday ? 'bg-blue-500/5 border-l-2 border-l-blue-500' : ''}`}>
+                                    <div className="flex-shrink-0 w-12 text-center">
+                                        <div className="text-xs text-slate-500 uppercase font-semibold">Étape</div>
+                                        <div className={`text-xl font-bold ${isToday ? 'text-blue-400' : 'text-slate-300'}`}>{stage.stageNumber}</div>
+                                    </div>
+
+                                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <div className="font-bold text-slate-200 truncate">{stage.name}</div>
+                                            {stageDate && (
+                                                <div className="text-sm text-slate-500 mt-0.5">
+                                                    {stageDate.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-3 flex-shrink-0 self-start sm:self-auto">
+                                            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center justify-center min-w-[3rem]">
+                                                {renderProfileIcon(stage.profileIcon)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </section>
             )}

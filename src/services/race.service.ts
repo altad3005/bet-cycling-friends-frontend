@@ -141,7 +141,8 @@ export const raceService = {
     },
     getRaceFantasyTeams: async (raceId: string | number, leagueId?: string): Promise<{ data: FantasyTeam[] }> => {
         const url = leagueId ? `/races/${raceId}/fantasy-teams?league_id=${leagueId}` : `/races/${raceId}/fantasy-teams`;
-        return await api.get(url);
+        const response = await api.get(url);
+        return response.data;
     },
 
     // Trigger calculation of prediction scores (Admin only typically)
