@@ -292,7 +292,7 @@ const RaceDetailPage = ({ params }: { params: Promise<{ leagueId: string, raceId
 
                 <Link
                     href={`/leagues/${leagueId}/races/${raceId}/startlist`}
-                    className="w-full p-4 bg-slate-800 text-slate-300 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors"
+                    className={`w-full p-4 bg-slate-800 text-slate-300 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors ${status === 'finished' ? 'md:col-span-2' : ''}`}
                 >
                     <Users className="w-5 h-5" />
                     Voir la Startlist

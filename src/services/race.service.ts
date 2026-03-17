@@ -96,6 +96,10 @@ export const raceService = {
         const response = await api.get(`/races/${raceId}/startlist`);
         return response.data;
     },
+    syncStartlist: async (raceId: string | number): Promise<{ message: string, data: Startlist }> => {
+        const response = await api.post(`/races/${raceId}/startlist/sync`);
+        return response.data;
+    },
     getRaceById: async (raceId: string | number): Promise<{ data: Race }> => {
         const response = await api.get(`/races/${raceId}`);
         return response.data;

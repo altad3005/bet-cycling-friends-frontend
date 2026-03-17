@@ -183,7 +183,7 @@ export default function BetPage({ params }: { params: Promise<{ leagueId: string
                 </section>
 
                 {isLiveOrFinished && !isBetConfirmed && (
-                    <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl flex items-center gap-3 text-orange-400 shadow-sm">
+                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3 text-green-400 shadow-sm">
                         <AlertCircle className="w-5 h-5 flex-shrink-0" />
                         La course a commencé, les pronostics sont clos !
                     </div>
